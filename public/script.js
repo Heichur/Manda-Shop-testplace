@@ -15,13 +15,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Variáveis globais
 let senhaAdmGlobal = "";  
 let webhookUrlGlobal = "";
 let ultimoPedidoTimestamp = 0;
-const COOLDOWN_PEDIDOS = 10000; // 10 segundos
+const COOLDOWN_PEDIDOS = 10000;
 
-// Lista de palavras proibidas 
 const palavrasProibidas = [
   'porra', 'merda', 'caralho', 'buceta', 'cu', 'puta', 'vadia', 'fdp', 'cuzao', 'pqp',
   'vsf', 'putaria', 'cacete', 'inferno', 'droga', 'maldito', 'desgraça',
@@ -30,7 +28,6 @@ const palavrasProibidas = [
   'maconha', 'cocaina', 'sexo', 'transar', 'foder', 'gay', 'bicha', 'nazista', 'hitler'
 ];
 
-// Função para normalizar nomes
 function normalizarNome(nome) {
   if (!nome || typeof nome !== 'string') return '';
   
@@ -38,11 +35,10 @@ function normalizarNome(nome) {
     .toLowerCase()
     .trim()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-    .replace(/[^a-z0-9]/g, ''); // Remove caracteres especiais
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
 }
 
-// Função para encontrar pokémon exato
 function encontrarPokemonExato(nomeDigitado) {
   if (typeof pokemonList === 'undefined' || !Array.isArray(pokemonList)) {
     return { encontrado: false };
@@ -60,7 +56,6 @@ function encontrarPokemonExato(nomeDigitado) {
   return { encontrado: false };
 }
 
-// Função para verificar nomes impróprios
 function verificarNomeImpropio(nome) {
   if (!nome || typeof nome !== 'string') return false;
   
@@ -71,7 +66,6 @@ function verificarNomeImpropio(nome) {
   );
 }
 
-// Função para validar nome do Pokémon
 function validarNomePokemon(nomeDigitado) {
   if (!nomeDigitado || nomeDigitado.trim() === '') {
     return { valido: false, tipo: 'vazio', mensagem: 'Digite o nome de um Pokémon' };
@@ -102,7 +96,6 @@ function validarNomePokemon(nomeDigitado) {
   }
 }
 
-// Verificar cooldown
 function verificarCooldown() {
   const tempoRestante = COOLDOWN_PEDIDOS - (Date.now() - ultimoPedidoTimestamp);
   
@@ -137,14 +130,13 @@ function analisarIVsUnificado(inputIvs) {
   const partes = inputIvs.split(',').map(parte => parte.trim()).filter(parte => parte !== '');
   
   let tipoIV = null;
-  const statsZerados = []; // 🎯 Apenas estes afetam o preço (0xxx)
-  const informacoesAdicionais = []; // 📝 Apenas informativos (-xxx)
+  const statsZerados = [];
+  const informacoesAdicionais = [];
   const erros = [];
 
   for (const parte of partes) {
     const parteUpper = parte.toUpperCase();
     
-    // Verificar tipos de IV (F2-F6)
     if (/^F[2-6]$/.test(parteUpper)) {
       if (tipoIV !== null) {
         erros.push(`Apenas um tipo de IV é permitido`);
@@ -152,7 +144,6 @@ function analisarIVsUnificado(inputIvs) {
         tipoIV = parteUpper;
       }
     } 
-    // 🎯 IVs ZERADOS REAIS (afetam preço) - formato: 0xxx
     else if (/^0(hp|atk|def|spa|spd|spe|attack|defense|special|speed)$/i.test(parte.toLowerCase())) {
       const statNormalizado = parte.toLowerCase()
         .replace('attack', 'atk')
@@ -164,7 +155,6 @@ function analisarIVsUnificado(inputIvs) {
         statsZerados.push(statNormalizado);
       }
     } 
-    // 📝 INFORMAÇÕES ADICIONAIS (NÃO afetam preço) - formato: -xxx
     else if (/^-(hp|atk|def|spa|spd|spe|attack|defense|special|speed)$/i.test(parte.toLowerCase())) {
       let statNormalizado = parte.toLowerCase()
         .replace('attack', 'atk')
@@ -229,7 +219,7 @@ function calcularPrecoIVs(dadosIVs) {
     tipoIVFinal = 'F6';
   }
 
- const precos = { F6: 90000, F5: 70000, F4: 40000, F3: 30000, F2: 25000 };
+  const precos = { F6: 90000, F5: 70000, F4: 40000, F3: 30000, F2: 25000 };
   const foiUpgradado = tipoIVFinal !== tipoOriginal;
   
   let detalhesUpgrade = '';
@@ -246,20 +236,16 @@ function calcularPrecoIVs(dadosIVs) {
   };
 }
 
-
 function formatarPedidoEstilizado(pedidoData, dadosIVs, calculoIVs) {
-  // Formatar preço de forma mais legível
   const precoFormatado = pedidoData.precoTotal >= 1000 
     ? `${Math.round(pedidoData.precoTotal / 1000)}.000k`
     : `${pedidoData.precoTotal}k`;
 
-  // Construir linha de IVs com upgrade se necessário
   let linhaIVs = dadosIVs.tipoIV;
   if (calculoIVs.foiUpgradado) {
     linhaIVs += ` → ${calculoIVs.tipoFinal} (upgrade)`;
   }
 
-  // Montar o conteúdo formatado
   let conteudoFormatado = `📦 **Novo Pedido**
 Nome do Jogador: ${pedidoData.nomeUsuario}
 Nome no Discord: ${pedidoData.nickDiscord}
@@ -271,10 +257,14 @@ Habilidades: ${pedidoData.habilidades}
 Sexo (♂/♀): ${pedidoData.sexo}
 IVs Solicitados: ${linhaIVs}`;
 
-  // Adicionar IVs zerados se houver
   if (pedidoData.ivsZerados && pedidoData.ivsZerados !== "Nenhum") {
     conteudoFormatado += `
 IVs Zerados: ${pedidoData.ivsZerados}`;
+  }
+
+  if (pedidoData.informacoesAdicionais && pedidoData.informacoesAdicionais !== "Nenhuma") {
+    conteudoFormatado += `
+Info Adicional: ${pedidoData.informacoesAdicionais} `;
   }
 
   conteudoFormatado += `
@@ -286,7 +276,6 @@ Preço total estimado: ${precoFormatado}`;
   return conteudoFormatado;
 }
 
-// Enviar webhook
 async function enviarWebhook(conteudo, tentativas = 3) {
   if (!webhookUrlGlobal) return false;
 
@@ -315,7 +304,6 @@ async function enviarWebhook(conteudo, tentativas = 3) {
   return false;
 }
 
-// Carregar configurações do Firebase
 async function carregarConfiguracoes() {
   try {
     const configDoc = await getDoc(doc(db, 'configuracoes', 'admin'));
@@ -329,7 +317,6 @@ async function carregarConfiguracoes() {
   }
 }
 
-// Utilitários para datas
 function obterChaveMesAtual() {
   const agora = new Date();
   return `compradores_${agora.getFullYear()}_${(agora.getMonth() + 1).toString().padStart(2, '0')}`;
@@ -342,7 +329,6 @@ function obterNomeMesAtual() {
   return `${meses[agora.getMonth()]} ${agora.getFullYear()}`;
 }
 
-// Registrar pedido no ranking
 async function registrarPedido(nomeUsuario) {
   const chaveMes = obterChaveMesAtual();
   
@@ -362,7 +348,6 @@ async function registrarPedido(nomeUsuario) {
     throw error;
   }
 }
-
 
 class PokemonSelect {
   constructor(element) {
@@ -605,8 +590,6 @@ function inicializarPokemonSelect() {
   }
 }
 
-
-
 function FazerLogin() {
   document.getElementById("LoginAdm").style.display = "none";
   document.getElementById("Login").style.display = "flex";
@@ -738,7 +721,6 @@ async function carregarTopCompradores() {
   }
 }
 
-
 async function EnviarPedido() {
   let pokeNome = '';
   if (window.pokemonSelectInstance) {
@@ -798,15 +780,26 @@ async function EnviarPedido() {
   
   const eggMovesStr = document.getElementById("EggMoves").value.trim();
   let precoEggMoves = 0;
-  if (eggMovesStr && eggMovesStr.toLowerCase() !== "nenhum") {
+  if (eggMovesStr && eggMovesStr.toLowerCase() !== "nenhum" && eggMovesStr !== "-") {
     const eggMovesArray = eggMovesStr.split(",").map(em => em.trim()).filter(em => em.length > 0);
     precoEggMoves = eggMovesArray.length * 10000;
   }
 
   const precoTotal = calculoIVs.preco + precoBreedavel + precoHidden + precoEggMoves;
+  
+  console.log('=== DEBUG CÁLCULO DE PREÇOS ===');
+  console.log('Preço IVs:', calculoIVs.preco);
+  console.log('Preço Breedável:', precoBreedavel);
+  console.log('Preço Hidden:', precoHidden);
+  console.log('Preço Egg Moves:', precoEggMoves);
+  console.log('Egg Moves String:', '"' + eggMovesStr + '"');
+  console.log('Castrado/Breedável:', '"' + castradoOuBreedavel + '"');
+  console.log('Hidden Habilidade:', hiddenHabilidade);
+  console.log('Total:', precoTotal);
+  console.log('===============================');
+  
   const nomeParaPedido = validacaoPokemon.valido ? validacaoPokemon.pokemon : pokeNome;
 
-  // Criar objeto com dados do pedido
   const pedidoData = {
     nomeUsuario,
     nickDiscord: NickDiscord,
@@ -828,10 +821,8 @@ async function EnviarPedido() {
     status: "pendente"
   };
 
-
   const previewFormatado = formatarPedidoEstilizado(pedidoData, dadosIVs, calculoIVs);
   
-  // Mostrar preview e confirmar
   const confirmarPedido = confirm(`${previewFormatado}
 
 ✅ Confirma este pedido?`);
@@ -843,12 +834,10 @@ async function EnviarPedido() {
   }
 
   try {
-    // Salvar no Firebase
     await addDoc(collection(db, 'pedidos'), pedidoData);
     await registrarPedido(nomeUsuario);
     ultimoPedidoTimestamp = Date.now();
 
-    // ✨ Enviar webhook com formatação estilizada
     await enviarWebhook(previewFormatado);
 
     alert(`>Seu pokémon já está em preparação, assim que ficar pronto, te notificamos para retirar na loja, Agradecemos a preferência!
@@ -856,7 +845,6 @@ async function EnviarPedido() {
 - IVs: ${dadosIVs.tipoIV}${calculoIVs.foiUpgradado ? ` → ${calculoIVs.tipoFinal} (Upgrade!)` : ''}
 - Preço total: ${Math.round(precoTotal/1000)}k**`);
 
-    // Limpar campos após sucesso
     if (window.pokemonSelectInstance) {
       window.pokemonSelectInstance.reset();
     }
@@ -914,7 +902,6 @@ function SobreNos() {
   alert("Em construção...");
 }
 
-
 function testarSistemaIVs() {
   const testes = [
     "F5",
@@ -944,7 +931,6 @@ Explicação: ${calculo.foiUpgradado ? calculo.detalhesUpgrade : 'Sem upgrade'}
   });
 }
 
-// Função para testar a formatação estilizada
 function testarFormatacao() {
   const pedidoExemplo = {
     nomeUsuario: "heichur",
@@ -976,7 +962,6 @@ function testarFormatacao() {
   return resultado;
 }
 
-// Inicialização
 document.addEventListener('DOMContentLoaded', async () => {
   await carregarConfiguracoes();
   
@@ -986,7 +971,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (comprandoSection) comprandoSection.style.display = "none";
   if (topCompradoresSection) topCompradoresSection.style.display = "none";
   
-  // Observer para detectar mudanças de visibilidade
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
@@ -1011,7 +995,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Exportar funções para uso global
 window.Comprar = Comprar;
 window.Preços = Preços;
 window.login = login;
