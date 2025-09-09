@@ -264,7 +264,7 @@ IVs Zerados: ${pedidoData.ivsZerados}`;
 
   if (pedidoData.informacoesAdicionais && pedidoData.informacoesAdicionais !== "Nenhuma") {
     conteudoFormatado += `
-Info Adicional: ${pedidoData.informacoesAdicionais} `;
+Info Adicional: ${pedidoData.informacoesAdicionais} (Como nome diz)`;
   }
 
   conteudoFormatado += `
@@ -820,6 +820,11 @@ async function EnviarPedido() {
     timestamp: new Date(),
     status: "pendente"
   };
+
+  console.log('=== DEBUG DADOS DO PEDIDO ===');
+  console.log('IVs Zerados:', dadosIVs.statsZerados);
+  console.log('Informações Adicionais:', dadosIVs.informacoesAdicionais);
+  console.log('============================');
 
   const previewFormatado = formatarPedidoEstilizado(pedidoData, dadosIVs, calculoIVs);
   
