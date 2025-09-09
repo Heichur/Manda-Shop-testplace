@@ -229,7 +229,7 @@ function calcularPrecoIVs(dadosIVs) {
     tipoIVFinal = 'F6';
   }
 
-  const precos = { F6: 90000, F5: 70000, F4: 40000, F3: 30000, F2: 25000 };
+ const precos = { F6: 90000, F5: 70000, F4: 40000, F3: 30000, F2: 25000 };
   const foiUpgradado = tipoIVFinal !== tipoOriginal;
   
   let detalhesUpgrade = '';
