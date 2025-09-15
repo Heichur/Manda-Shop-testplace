@@ -1,7 +1,7 @@
 
 const pokemonList = [
   
-  'Pichu', 'Cleffa', 'Igglybuff', 'Togepi', 'Tyrogue', 'Smoochum', 'Elekid', 
+ 'Spiritomb', 'Pichu', 'Cleffa', 'Igglybuff', 'Togepi', 'Tyrogue', 'Smoochum', 'Elekid', 
   'Magby', 'Azurill', 'Wynaut', 'Budew', 'Chingling', 'Bonsly', 'Mime Jr.', 
   'Happiny', 'Munchlax', 'Riolu', 'Mantyke',
   
@@ -40,7 +40,7 @@ const pokemonList = [
   'Torkoal', 'Spoink', 'Spinda', 'Trapinch', 'Cacnea', 'Swablu', 'Zangoose', 
   'Seviper', 'Barboach', 'Corphish', 'Feebas', 'Kecleon', 'Shuppet', 'Duskull', 
   'Tropius', 'Absol', 'Snorunt', 'Spheal', 'Clamperl', 'Relicanth', 'Luvdisc', 
-  'Bagon',
+  'Bagon', 'Mimikyu', 
   
   
   'Turtwig', 'Chimchar', 'Piplup', 'Starly', 'Bidoof', 'Kricketot', 'Shinx', 
@@ -48,7 +48,7 @@ const pokemonList = [
   'Voltorb de Hisui', 'Drifloon', 'Buneary', 'Glameow', 'Stunky', 
   'Stunfisk de Galar', 'Chatot', 'Gible', 'Hippopotas', 'Skorupi', 'Croagunk', 
   'Carnivine', 'Finneon', 'Snover',
-  
+'Mareanie','Togedemaru', 'Toxapex', 
   
   'Snivy', 'Tepig', 'Oshawott', 'Oshawott de Hisui', 'Patrat', 'Lillipup', 
   'Purrloin', 'Pansage', 'Pansear', 'Panpour', 'Munna', 'Pidove', 'Blitzle', 

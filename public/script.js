@@ -20,13 +20,139 @@ let webhookUrlGlobal = "";
 let ultimoPedidoTimestamp = 0;
 const COOLDOWN_PEDIDOS = 10000;
 
+let sistemaAberto = false;
+
 const palavrasProibidas = [
-  'porra', 'merda', 'caralho', 'buceta', 'cu', 'puta', 'vadia', 'fdp', 'cuzao', 'pqp',
+  'porra', 'merda', 'caralho', 'buceta', 'puta', 'vadia', 'fdp', 'cuzao', 'pqp',
   'vsf', 'putaria', 'cacete', 'inferno', 'droga', 'maldito', 'desgraça',
   'idiota', 'imbecil', 'retardado', 'burro', 'estupido', 'babaca', 'otario',
   'filho da puta', 'safado', 'vagabundo', 'corno', 'viado',
   'maconha', 'cocaina', 'sexo', 'transar', 'foder', 'gay', 'bicha', 'nazista', 'hitler'
 ];
+
+// EVENTO SECRETO - Função para verificar se o evento deve ser ativado
+function verificarEventoSecreto() {
+  const chance = Math.floor(Math.random() * 100000) + 1;
+  return chance === 1; // 1 em 100.000 chance
+}
+
+// EVENTO SECRETO - Função para executar o evento
+function executarEventoSecreto() {
+  // Primeira mensagem
+  alert("Uma besta das sombras aparece em sua frente");
+  
+  // Criar e exibir a imagem
+  const imagemEvento = document.createElement('div');
+  imagemEvento.id = 'eventoSecreto';
+  
+  const img = document.createElement('img');
+  // Você pode alterar esta URL depois
+  img.src = 'img/MandaShop.png'; // Placeholder - você alterará depois
+  
+  // Fallback caso a imagem não carregue
+  img.onerror = function() {
+    img.className = 'shadow-beast-placeholder';
+    img.alt = '🌙 BESTA DAS SOMBRAS 🌙';
+  };
+  
+  imagemEvento.appendChild(img);
+  document.body.appendChild(imagemEvento);
+  
+  // Aguardar um pouco e então mostrar a segunda mensagem
+  setTimeout(() => {
+    alert("Parabéns, umbreon escolheu você como ganhador de um prêmio!");
+    
+    // Remover a imagem após o segundo alert
+    setTimeout(() => {
+      if (document.getElementById('eventoSecreto')) {
+        document.getElementById('eventoSecreto').remove();
+      }
+    }, 1000);
+  }, 3000);
+}
+
+function Aberto() {
+  sistemaAberto = true;
+  bloquearBotoes();
+}
+
+function Fechado() {
+  sistemaAberto = false;
+  desbloquearBotoes();
+}
+
+function verificarSistemaAberto() {
+  if (sistemaAberto) {
+    alert("⚠️ Uma operação já está em andamento. Aguarde ou feche a tela atual.");
+    return true;
+  }
+  return false;
+}
+
+function bloquearBotoes() {
+  // Lista de IDs dos botões principais
+  const botoesBloqueados = [
+    'btnLogin',
+    'btnLoginAdm', 
+    'btnTabela',
+    'btnComprar',
+    'btnTopCompradores',
+    'btnSobreNos'
+  ];
+  
+  // Bloquear por IDs específicos
+  botoesBloqueados.forEach(id => {
+    const botao = document.getElementById(id);
+    if (botao) {
+      botao.disabled = true;
+      botao.style.opacity = '0.5';
+      botao.style.cursor = 'not-allowed';
+      botao.setAttribute('data-bloqueado', 'true');
+    }
+  });
+  
+  // Bloquear por classes CSS (fallback)
+  const botoes = document.querySelectorAll('.botao-principal, .btn-menu, button[onclick*="Fazer"], button[onclick*="Comprar"], button[onclick*="Preços"], button[onclick*="Mostrar"], button[onclick*="Sobre"]');
+  botoes.forEach(botao => {
+    if (!botao.getAttribute('data-bloqueado')) {
+      botao.disabled = true;
+      botao.style.opacity = '0.5';
+      botao.style.cursor = 'not-allowed';
+      botao.setAttribute('data-bloqueado', 'true');
+    }
+  });
+}
+
+function desbloquearBotoes() {
+  // Desbloquear por IDs específicos
+  const botoesBloqueados = [
+    'btnLogin',
+    'btnLoginAdm',
+    'btnTabela', 
+    'btnComprar',
+    'btnTopCompradores',
+    'btnSobreNos'
+  ];
+  
+  botoesBloqueados.forEach(id => {
+    const botao = document.getElementById(id);
+    if (botao) {
+      botao.disabled = false;
+      botao.style.opacity = '1';
+      botao.style.cursor = 'pointer';
+      botao.removeAttribute('data-bloqueado');
+    }
+  });
+  
+  // Desbloquear todos os botões marcados
+  const botoes = document.querySelectorAll('button[data-bloqueado="true"]');
+  botoes.forEach(botao => {
+    botao.disabled = false;
+    botao.style.opacity = '1';
+    botao.style.cursor = 'pointer';
+    botao.removeAttribute('data-bloqueado');
+  });
+}
 
 function normalizarNome(nome) {
   if (!nome || typeof nome !== 'string') return '';
@@ -591,6 +717,16 @@ function inicializarPokemonSelect() {
 }
 
 function FazerLogin() {
+  if (verificarSistemaAberto()) return;
+  
+  // VERIFICAÇÃO DO EVENTO SECRETO
+  if (verificarEventoSecreto()) {
+    executarEventoSecreto();
+    return;
+  }
+  
+  Aberto();
+  
   document.getElementById("LoginAdm").style.display = "none";
   document.getElementById("Login").style.display = "flex";
   document.getElementById("TelaLogin").style.display = "flex";
@@ -598,6 +734,16 @@ function FazerLogin() {
 }
 
 function FazerLoginAdm() {
+  if (verificarSistemaAberto()) return;
+  
+  // VERIFICAÇÃO DO EVENTO SECRETO
+  if (verificarEventoSecreto()) {
+    executarEventoSecreto();
+    return;
+  }
+  
+  Aberto();
+  
   document.getElementById("Login").style.display = "none";
   document.getElementById("LoginAdm").style.display = "flex";
   document.getElementById("TelaLogin").style.display = "flex";
@@ -644,6 +790,7 @@ function login() {
   alert(`Seja bem-vindo ${Nick}!`);
   document.getElementById("TelaLogin").style.display = "none";
   document.getElementById("Site_Container").style.display = "flex";
+  Fechado(); 
 }
 
 function Comprar() {
@@ -654,11 +801,21 @@ function Comprar() {
     return;
   }
   
+  if (verificarSistemaAberto()) return;
+  
+  // VERIFICAÇÃO DO EVENTO SECRETO
+  if (verificarEventoSecreto()) {
+    executarEventoSecreto();
+    return;
+  }
+  
   const statusCooldown = verificarCooldown();
   if (statusCooldown.emCooldown) {
     alert(`⏰ Aguarde ${statusCooldown.segundosRestantes} segundo(s) para fazer um novo pedido.`);
     return;
   }
+  
+  Aberto();
   
   document.getElementById("Site_Container").style.display = "none";
   document.getElementById("Comprando").style.display = "flex";
@@ -669,6 +826,10 @@ function Comprar() {
 }
 
 function MostrarTopCompradores() {
+  if (verificarSistemaAberto()) return;
+  
+  Aberto();
+  
   document.getElementById("Site_Container").style.display = "none";
   document.getElementById("TopCompradores").style.display = "flex";
   document.getElementById("MesAtual").innerHTML = `<h3>Ranking de ${obterNomeMesAtual()}</h3>`;
@@ -719,6 +880,50 @@ async function carregarTopCompradores() {
     console.error("Erro ao carregar compradores:", error);
     listaCompradores.innerHTML = "<p>❌ Erro ao carregar dados.</p>";
   }
+}
+
+function Preços() {
+  if (verificarSistemaAberto()) return;
+  
+  Aberto();
+  
+  document.getElementById("Tabela").style.display = "flex";
+  document.getElementById("Site_Container").style.display = "none";
+}
+
+function SobreNos() {
+  if (verificarSistemaAberto()) return;
+  
+  alert("Em construção...");
+}
+
+function Fechar() {
+  document.getElementById("TelaLogin").style.display = "none";
+  document.getElementById("Site_Container").style.display = "flex";
+  Fechado();
+}
+
+function VoltarParaSite() {
+  if (window.pokemonSelectInstance) {
+    window.pokemonSelectInstance.destroy();
+    window.pokemonSelectInstance = null;
+  }
+  
+  document.getElementById("Comprando").style.display = "none";
+  document.getElementById("Site_Container").style.display = "flex";
+  Fechado();
+}
+
+function FecharTopCompradores() {
+  document.getElementById("TopCompradores").style.display = "none";
+  document.getElementById("Site_Container").style.display = "flex";
+  Fechado();
+}
+
+function FecharTabela() {
+  document.getElementById("Tabela").style.display = "none";
+  document.getElementById("Site_Container").style.display = "flex";
+  Fechado();
 }
 
 async function EnviarPedido() {
@@ -845,10 +1050,10 @@ async function EnviarPedido() {
 
     await enviarWebhook(previewFormatado);
 
-    alert(`>Seu pokémon já está em preparação, assim que ficar pronto, te notificamos para retirar na loja, Agradecemos a preferência!
+    alert(`Seu pokémon já está em preparação, assim que ficar pronto, te notificamos para retirar na loja, Agradecemos a preferência!
 - Pokémon: ${nomeParaPedido}
 - IVs: ${dadosIVs.tipoIV}${calculoIVs.foiUpgradado ? ` → ${calculoIVs.tipoFinal} (Upgrade!)` : ''}
-- Preço total: ${Math.round(precoTotal/1000)}k**`);
+- Preço total: ${Math.round(precoTotal/1000)}k`);
 
     if (window.pokemonSelectInstance) {
       window.pokemonSelectInstance.reset();
@@ -871,40 +1076,6 @@ async function EnviarPedido() {
     btnEnviar.textContent = "Enviar Pedido";
     btnEnviar.disabled = false;
   }
-}
-
-function VoltarParaSite() {
-  if (window.pokemonSelectInstance) {
-    window.pokemonSelectInstance.destroy();
-    window.pokemonSelectInstance = null;
-  }
-  
-  document.getElementById("Comprando").style.display = "none";
-  document.getElementById("Site_Container").style.display = "flex";
-}
-
-function FecharTopCompradores() {
-  document.getElementById("TopCompradores").style.display = "none";
-  document.getElementById("Site_Container").style.display = "flex";
-}
-
-function Preços() {
-  document.getElementById("Tabela").style.display = "flex";
-  document.getElementById("Site_Container").style.display = "none";
-}
-
-function FecharTabela() {
-  document.getElementById("Tabela").style.display = "none";
-  document.getElementById("Site_Container").style.display = "flex";
-}
-
-function Fechar() {
-  document.getElementById("TelaLogin").style.display = "none";
-  document.getElementById("Site_Container").style.display = "flex";
-}
-
-function SobreNos() {
-  alert("Em construção...");
 }
 
 function testarSistemaIVs() {
@@ -967,9 +1138,16 @@ function testarFormatacao() {
   return resultado;
 }
 
+// FUNÇÃO PARA TESTAR O EVENTO SECRETO (apenas para desenvolvimento)
+function forcarEventoSecreto() {
+  console.log("🧪 Forçando evento secreto para teste...");
+  executarEventoSecreto();
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await carregarConfiguracoes();
   
+  // Garantir que as telas estejam ocultas inicialmente
   const comprandoSection = document.getElementById("Comprando");
   const topCompradoresSection = document.getElementById("TopCompradores");
   
@@ -998,8 +1176,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       attributeFilter: ['style']
     });
   }
+
+  Fechado();
 });
 
+// Exportar funções para o window
+window.Aberto = Aberto;
+window.Fechado = Fechado;
+window.verificarSistemaAberto = verificarSistemaAberto;
 window.Comprar = Comprar;
 window.Preços = Preços;
 window.login = login;
@@ -1016,3 +1200,4 @@ window.EnviarPedido = EnviarPedido;
 window.formatarPedidoEstilizado = formatarPedidoEstilizado;
 window.testarFormatacao = testarFormatacao;
 window.testarSistemaIVs = testarSistemaIVs;
+window.forcarEventoSecreto = forcarEventoSecreto; // Para testes apenas
