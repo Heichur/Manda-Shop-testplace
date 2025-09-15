@@ -511,10 +511,10 @@ p {
 
 @keyframes pulseGlow {
   0%, 100% { 
-    box-shadow: 0 0 20px purple; 
+    box-shadow: 0 0 20px rgb(117, 10, 10); 
   }
   50% { 
-    box-shadow: 0 0 50px purple, 0 0 70px purple; 
+    box-shadow: 0 0 50px rgb(117, 10, 10), 0 0 70px rgb(117, 10, 10); 
   }
 }
 

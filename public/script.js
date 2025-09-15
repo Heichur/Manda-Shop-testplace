@@ -60,7 +60,7 @@ function executarEventoSecreto() {
   
   // Aguardar um pouco e então mostrar a segunda mensagem
   setTimeout(() => {
-    alert("Parabéns, umbreon escolheu você como ganhador de um prêmio!");
+    alert("Parabéns, umbreon escolheu você como ganhador de um prêmio! Marque @heichurr para receber seu prêmio! (lembrando que só aceitarei a primeira pessoa que mandar)");
     
     // Remover a imagem após o segundo alert
     setTimeout(() => {
