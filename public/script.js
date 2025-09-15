@@ -32,7 +32,7 @@ const palavrasProibidas = [
 
 // EVENTO SECRETO - Função para verificar se o evento deve ser ativado
 function verificarEventoSecreto() {
-  const chance = Math.floor(Math.random() * 100000) + 1;
+  const chance = Math.floor(Math.random() * 1000) + 1;
   return chance === 1; // 1 em 100.000 chance
 }
 
@@ -46,8 +46,8 @@ function executarEventoSecreto() {
   imagemEvento.id = 'eventoSecreto';
   
   const img = document.createElement('img');
-  // Você pode alterar esta URL depois
-  img.src = 'img/MandaShop.png'; // Placeholder - você alterará depois
+
+  img.src = 'img/Umbreon_Secreto.png'; // Placeholder - você alterará depois
   
   // Fallback caso a imagem não carregue
   img.onerror = function() {
@@ -1200,4 +1200,3 @@ window.EnviarPedido = EnviarPedido;
 window.formatarPedidoEstilizado = formatarPedidoEstilizado;
 window.testarFormatacao = testarFormatacao;
 window.testarSistemaIVs = testarSistemaIVs;
-window.forcarEventoSecreto = forcarEventoSecreto; // Para testes apenas

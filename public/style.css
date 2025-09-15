@@ -504,8 +504,8 @@ p {
   background: rgba(0, 0, 0, 0.9);
   padding: 20px;
   border-radius: 20px;
-  border: 3px solid purple;
-  box-shadow: 0 0 50px purple;
+  border: 3px solid rgb(182, 17, 17);
+  box-shadow: 0 0 50px rgb(182, 17, 17);
   animation: pulseGlow 2s infinite;
 }
 
