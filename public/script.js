@@ -30,6 +30,12 @@ const palavrasProibidas = [
   'maconha', 'cocaina', 'sexo', 'transar', 'foder', 'gay', 'bicha', 'nazista', 'hitler'
 ];
 
+// EVENTO SECRETO - Função para verificar se o evento deve ser ativado
+function verificarEventoSecreto() {
+  const chance = Math.floor(Math.random() * 10000) + 1;
+  return chance === 1; // 1 em 10.000 chance
+}
+
 // EVENTO SECRETO - Função para executar o evento
 function executarEventoSecreto() {
   // Primeira mensagem
@@ -40,7 +46,8 @@ function executarEventoSecreto() {
   imagemEvento.id = 'eventoSecreto';
   
   const img = document.createElement('img');
-  img.src = 'img/Umbreon_Secreto.png';
+
+  img.src = 'img/Umbreon_Secreto.png'; 
   
   // Fallback caso a imagem não carregue
   img.onerror = function() {
@@ -53,7 +60,7 @@ function executarEventoSecreto() {
   
   // Aguardar um pouco e então mostrar a segunda mensagem
   setTimeout(() => {
-    alert("Parabéns, umbreon escolheu você como ganhador de um prêmio! Marque @heichurr para receber seu prêmio! (lembrando que só aceitarei a primeira pessoa que mandar)");
+    alert("Parabéns, umbreon escolheu você como ganhador de um prêmio!");
     
     // Remover a imagem após o segundo alert
     setTimeout(() => {
@@ -712,6 +719,12 @@ function inicializarPokemonSelect() {
 function FazerLogin() {
   if (verificarSistemaAberto()) return;
   
+  // VERIFICAÇÃO DO EVENTO SECRETO
+  if (verificarEventoSecreto()) {
+    executarEventoSecreto();
+    return;
+  }
+  
   Aberto();
   
   document.getElementById("LoginAdm").style.display = "none";
@@ -722,6 +735,12 @@ function FazerLogin() {
 
 function FazerLoginAdm() {
   if (verificarSistemaAberto()) return;
+  
+  // VERIFICAÇÃO DO EVENTO SECRETO
+  if (verificarEventoSecreto()) {
+    executarEventoSecreto();
+    return;
+  }
   
   Aberto();
   
@@ -783,6 +802,12 @@ function Comprar() {
   }
   
   if (verificarSistemaAberto()) return;
+  
+  // VERIFICAÇÃO DO EVENTO SECRETO
+  if (verificarEventoSecreto()) {
+    executarEventoSecreto();
+    return;
+  }
   
   const statusCooldown = verificarCooldown();
   if (statusCooldown.emCooldown) {
@@ -1063,7 +1088,7 @@ function testarSistemaIVs() {
     "F4, 0atk, -spe"
   ];
   
-  console.log("🧪 **TESTE DO SISTEMA DE IVs CORRIGIDO**\n");
+  console.log("🧪 **TESTE DO SISTEMA DE IVS CORRIGIDO**\n");
   
   testes.forEach(teste => {
     const resultado = analisarIVsUnificado(teste);
@@ -1153,11 +1178,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   Fechado();
-  
-  // EXECUTAR EVENTO SECRETO AO CARREGAR O SITE
-  setTimeout(() => {
-    executarEventoSecreto();
-  }, 2000); // Aguarda 2 segundos para garantir que a página carregou completamente
 });
 
 // Exportar funções para o window
@@ -1180,4 +1200,4 @@ window.EnviarPedido = EnviarPedido;
 window.formatarPedidoEstilizado = formatarPedidoEstilizado;
 window.testarFormatacao = testarFormatacao;
 window.testarSistemaIVs = testarSistemaIVs;
-window.forcarEventoSecreto = forcarEventoSecreto;
+window.forcarEventoSecreto = forcarEventoSecreto; // Para testes apenas
