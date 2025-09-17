@@ -32,7 +32,7 @@ const palavrasProibidas = [
 
 // EVENTO SECRETO - Função para verificar se o evento deve ser ativado
 function verificarEventoSecreto() {
-  const chance = Math.floor(Math.random() * 10000) + 1;
+  const chance = Math.floor(Math.random() * 1) + 1;
   return chance === 1; // 1 em 10.000 chance
 }
 
@@ -1200,4 +1200,3 @@ window.EnviarPedido = EnviarPedido;
 window.formatarPedidoEstilizado = formatarPedidoEstilizado;
 window.testarFormatacao = testarFormatacao;
 window.testarSistemaIVs = testarSistemaIVs;
-window.forcarEventoSecreto = forcarEventoSecreto; // Para testes apenas
