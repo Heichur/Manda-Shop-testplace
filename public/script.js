@@ -32,8 +32,8 @@ const palavrasProibidas = [
 
 // EVENTO SECRETO - Função para verificar se o evento deve ser ativado
 function verificarEventoSecreto() {
-  const chance = Math.floor(Math.random() * 1) + 1;
-  return chance === 1; // 1 em 10.000 chance
+  const chance = Math.floor(Math.random() * 3000) + 1;
+  return chance === 1; // 1 em 3000 chance
 }
 
 // EVENTO SECRETO - Função para executar o evento
