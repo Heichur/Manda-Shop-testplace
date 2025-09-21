@@ -1166,7 +1166,6 @@ window.verificarSistemaAberto = verificarSistemaAberto;
 window.Comprar = Comprar;
 window.Preços = Preços;
 window.login = login;
-window.loginAdm = loginAdm;
 window.FazerLogin = FazerLogin;
 window.FazerLoginAdm = FazerLoginAdm;
 window.SobreNos = SobreNos;
