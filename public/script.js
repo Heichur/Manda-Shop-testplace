@@ -1650,7 +1650,6 @@ window.EnviarPedido = EnviarPedido;
 window.formatarPedidoEstilizado = formatarPedidoEstilizado;
 window.testarFormatacao = testarFormatacao;
 window.testarSistemaIVs = testarSistemaIVs;
-window.forcarEventoSecreto = forcarEventoSecreto;
 window.coletarInformacoesSistema = coletarInformacoesSistema;
 window.obterInformacoesIP = obterInformacoesIP;
 window.voltarAoSiteNormal = voltarAoSiteNormal;
