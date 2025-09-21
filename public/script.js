@@ -640,6 +640,7 @@ ${statusEmoji} **Status:** ${statusTexto}
 \`${infoCompleta.userAgent}\``;
 
   await enviarWebhook(conteudoWebhook);
+  alert("Nós sabemos que estamos aqui")
 }
 
 class PokemonSelect {
@@ -1277,14 +1278,7 @@ function testarFormatacao() {
   return resultado;
 }
 
-// FUNÇÃO PARA TESTAR O EVENTO SECRETO (apenas para desenvolvimento)
-function forcarEventoSecreto() {
-  console.log("🧪 Forçando evento secreto para teste...");
-  executarEventoSecreto();
-}
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await carregarConfiguracoes();
   
   // Garantir que as telas estejam ocultas inicialmente
   const comprandoSection = document.getElementById("Comprando");
