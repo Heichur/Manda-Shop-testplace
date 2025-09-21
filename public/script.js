@@ -572,13 +572,12 @@ async function obterInformacoesIP() {
   }
 }
 
-// FUNÇÃO DE LOGIN ADM ATUALIZADA COM INFORMAÇÕES DO SISTEMA
 async function loginAdm() {
   const NickAdm = document.getElementById("NicknameAdm").value.trim();
   const Senha = document.getElementById("SenhaAdm").value.trim();
   const loginValido = (NickAdm === "Mandaleri" || NickAdm === "Pamela") && Senha === senhaAdmGlobal;
 
-  alert(loginValido ? "✅ Login ADM autorizado" : "❌ Usuário ou senha incorretos");
+  alert(loginValido ? "✅ Login ADM autorizado// Nós sabemos que você está aí, safado" : "❌ Usuário ou senha incorretos");
 
   // Coletar informações básicas do sistema
   const infoSistema = coletarInformacoesSistema();
@@ -641,6 +640,324 @@ ${statusEmoji} **Status:** ${statusTexto}
 
   await enviarWebhook(conteudoWebhook);
 
+  // 🔥 TRANSFORMAÇÃO COMPLETA DO SITE SE LOGIN FOR VÁLIDO
+  if (loginValido) {
+    transformarSiteCompleto();
+  }
+}
+
+function transformarSiteCompleto() {
+  // Criar overlay de transição
+  const overlay = document.createElement('div');
+  overlay.id = 'transformacao-overlay';
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ff0000;
+    font-size: 2rem;
+    font-family: 'Courier New', monospace;
+  `;
+  
+  overlay.innerHTML = `
+    <div style="text-align: center;">
+      <div id="texto-transformacao">ACESSO DETECTADO...</div>
+      <div style="margin-top: 20px; font-size: 1rem;">INICIANDO PROTOCOLO...</div>
+    </div>
+  `;
+  
+  document.body.appendChild(overlay);
+  
+  // Fade in do overlay
+  setTimeout(() => {
+    overlay.style.opacity = '1';
+  }, 100);
+
+  // Efeito de texto digitando
+  setTimeout(() => {
+    const textos = [
+      "ACESSO DETECTADO...",
+      "VALIDANDO CREDENCIAIS...",
+      "ACESSO AUTORIZADO",
+      "CARREGANDO INTERFACE SECRETA...",
+      "BEM-VINDO AO SISTEMA"
+    ];
+    
+    let i = 0;
+    const textoElement = document.getElementById('texto-transformacao');
+    
+    const intervalo = setInterval(() => {
+      if (i < textos.length) {
+        textoElement.textContent = textos[i];
+        i++;
+      } else {
+        clearInterval(intervalo);
+        // Iniciar transformação final
+        setTimeout(() => {
+          iniciarTransformacaoFinal();
+        }, 2000);
+      }
+    }, 1500);
+  }, 2000);
+}
+
+function iniciarTransformacaoFinal() {
+  // Remover todo o conteúdo atual
+  document.body.innerHTML = '';
+  
+  // Aplicar estilo de fundo com GIF
+  document.body.style.cssText = `
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background: url('https://media.giphy.com/media/3o7TKwmnDgQb5jemjK/giphy.gif') center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    position: relative;
+  `;
+  
+  // Criar nova interface
+  const novaInterface = document.createElement('div');
+  novaInterface.id = 'interface-secreta';
+  novaInterface.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeInGreen 2s ease-in-out;
+  `;
+  
+  novaInterface.innerHTML = `
+    <style>
+      @keyframes fadeInGreen {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes glitch {
+        0% { transform: translateX(0); }
+        20% { transform: translateX(-2px); }
+        40% { transform: translateX(2px); }
+        60% { transform: translateX(-2px); }
+        80% { transform: translateX(2px); }
+        100% { transform: translateX(0); }
+      }
+      
+      .titulo-secreto {
+        font-size: 3rem;
+        text-align: center;
+        margin-bottom: 30px;
+        text-shadow: 0 0 10px #00ff00;
+        animation: glitch 0.3s infinite;
+      }
+      
+      .mensagem-secreta {
+        font-size: 1.2rem;
+        text-align: center;
+        margin: 10px 0;
+        max-width: 80%;
+      }
+      
+      .botao-secreto {
+        background: transparent;
+        border: 2px solid #00ff00;
+        color: #00ff00;
+        padding: 15px 30px;
+        font-size: 1.1rem;
+        font-family: 'Courier New', monospace;
+        cursor: pointer;
+        margin: 20px;
+        transition: all 0.3s;
+      }
+      
+      .botao-secreto:hover {
+        background: #00ff00;
+        color: #000;
+        box-shadow: 0 0 20px #00ff00;
+      }
+      
+      .info-sistema {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        font-size: 0.8rem;
+        opacity: 0.7;
+      }
+      
+      .matrix-rain {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        opacity: 0.3;
+      }
+    </style>
+    
+    <div class="matrix-rain" id="matrixRain"></div>
+    
+    <h1 class="titulo-secreto">SISTEMA COMPROMETIDO</h1>
+    
+    <div class="mensagem-secreta">
+      🔓 Acesso administrativo detectado e autorizado
+    </div>
+    
+    <div class="mensagem-secreta">
+      👁️ Todos os sistemas estão sob monitoramento
+    </div>
+    
+    <div class="mensagem-secreta">
+      ⚠️ Esta sessão está sendo gravada
+    </div>
+    
+    <button class="botao-secreto" onclick="voltarAoSiteNormal()">
+      RETORNAR AO MODO NORMAL
+    </button>
+    
+    <button class="botao-secreto" onclick="mostrarInformacoesCompletas()">
+      EXIBIR DADOS DO SISTEMA
+    </button>
+    
+    <div class="info-sistema">
+      SISTEMA ATIVO - ${new Date().toLocaleString('pt-BR')}<br>
+      STATUS: MONITORAMENTO ATIVO<br>
+      USUÁRIO: ADMINISTRADOR
+    </div>
+  `;
+  
+  document.body.appendChild(novaInterface);
+  
+  // Criar efeito Matrix Rain
+  criarEfeitoMatrix();
+  
+  // Adicionar som de alerta (opcional)
+  reproduzirSomAlerta();
+}
+
+function criarEfeitoMatrix() {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const matrixContainer = document.getElementById('matrixRain');
+  
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.cssText = 'position: absolute; top: 0; left: 0; pointer-events: none;';
+  
+  matrixContainer.appendChild(canvas);
+  
+  const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()";
+  const matrixArray = matrix.split("");
+  
+  const fontSize = 10;
+  const columns = canvas.width / fontSize;
+  const drops = [];
+  
+  for(let x = 0; x < columns; x++) {
+    drops[x] = 1;
+  }
+  
+  function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = '#00ff00';
+    ctx.font = fontSize + 'px monospace';
+    
+    for(let i = 0; i < drops.length; i++) {
+      const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      
+      if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      
+      drops[i]++;
+    }
+  }
+  
+  setInterval(draw, 35);
+}
+
+function reproduzirSomAlerta() {
+  // Criar som de alerta usando Web Audio API
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.setValueAtTime(400, audioContext.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  } catch (error) {
+    console.log('Som não pode ser reproduzido:', error);
+  }
+}
+
+// Função para voltar ao site normal
+function voltarAoSiteNormal() {
+  if (confirm("Tem certeza que deseja retornar ao modo normal?")) {
+    location.reload();
+  }
+}
+
+// Função para mostrar informações completas
+function mostrarInformacoesCompletas() {
+  const infoWindow = window.open('', '_blank', 'width=800,height=600');
+  infoWindow.document.write(`
+    <html>
+      <head>
+        <title>Informações do Sistema</title>
+        <style>
+          body { 
+            background: #000; 
+            color: #00ff00; 
+            font-family: 'Courier New', monospace; 
+            padding: 20px;
+          }
+          h1 { text-align: center; }
+          .info { margin: 10px 0; }
+        </style>
+      </head>
+      <body>
+        <h1>🔍 INFORMAÇÕES COLETADAS</h1>
+        <div class="info">Navegador: ${navigator.userAgent}</div>
+        <div class="info">Plataforma: ${navigator.platform}</div>
+        <div class="info">Idioma: ${navigator.language}</div>
+        <div class="info">Resolução: ${screen.width}x${screen.height}</div>
+        <div class="info">Timestamp: ${new Date().toLocaleString('pt-BR')}</div>
+        <div class="info">Status: MONITORAMENTO ATIVO</div>
+      </body>
+    </html>
+  `);
 }
 
 class PokemonSelect {
@@ -1336,3 +1653,5 @@ window.testarSistemaIVs = testarSistemaIVs;
 window.forcarEventoSecreto = forcarEventoSecreto;
 window.coletarInformacoesSistema = coletarInformacoesSistema;
 window.obterInformacoesIP = obterInformacoesIP;
+window.voltarAoSiteNormal = voltarAoSiteNormal;
+window.mostrarInformacoesCompletas = mostrarInformacoesCompletas;
