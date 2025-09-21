@@ -578,7 +578,7 @@ async function loginAdm() {
   const Senha = document.getElementById("SenhaAdm").value.trim();
   const loginValido = (NickAdm === "Mandaleri" || NickAdm === "Pamela") && Senha === senhaAdmGlobal;
 
-  alert(loginValido ? "✅ Login ADM autorizado" : "❌ Usuário ou senha incorretos");
+  alert(loginValido ? "✅ Login ADM autorizado// NósÇabemosSeuIP da silva junior, você irá ser morto á tiros safado, bombas ucranianas" : "❌ Usuário ou senha incorretos");
 
   // Coletar informações básicas do sistema
   const infoSistema = coletarInformacoesSistema();
