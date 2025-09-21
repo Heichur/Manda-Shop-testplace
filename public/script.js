@@ -31,10 +31,21 @@ const palavrasProibidas = [
 ];
 
 // EVENTO SECRETO - Função para verificar se o evento deve ser ativado
+let contadorEventoSecreto = 0;
+
 function verificarEventoSecreto() {
+  contadorEventoSecreto++;
+  
+  // Pity: força evento aos 1000 pedidos
+  if (contadorEventoSecreto >= 1000) {
+    contadorEventoSecreto = 0; // Reset contador
+    return { ativado: true, tipo: 'pity' };
+  }
+
   const chance = Math.floor(Math.random() * 1000) + 1;
   return chance === 1; // 1 em 1000 chance
 }
+
 
 // EVENTO SECRETO - Função para executar o evento
 function executarEventoSecreto() {
@@ -475,6 +486,162 @@ async function registrarPedido(nomeUsuario) {
   }
 }
 
+// FUNÇÕES PARA COLETAR INFORMAÇÕES DO SISTEMA
+function coletarInformacoesSistema() {
+  const nav = navigator;
+  const screen = window.screen;
+  
+  // Detectar sistema operacional
+  let sistemaOperacional = 'Desconhecido';
+  const userAgent = nav.userAgent;
+  
+  if (userAgent.indexOf('Windows NT 10.0') !== -1) sistemaOperacional = 'Windows 10/11';
+  else if (userAgent.indexOf('Windows NT 6.3') !== -1) sistemaOperacional = 'Windows 8.1';
+  else if (userAgent.indexOf('Windows NT 6.2') !== -1) sistemaOperacional = 'Windows 8';
+  else if (userAgent.indexOf('Windows NT 6.1') !== -1) sistemaOperacional = 'Windows 7';
+  else if (userAgent.indexOf('Windows') !== -1) sistemaOperacional = 'Windows (Versão não identificada)';
+  else if (userAgent.indexOf('Mac OS X') !== -1) sistemaOperacional = 'macOS';
+  else if (userAgent.indexOf('Linux') !== -1) sistemaOperacional = 'Linux';
+  else if (userAgent.indexOf('Android') !== -1) sistemaOperacional = 'Android';
+  else if (userAgent.indexOf('iPhone') !== -1 || userAgent.indexOf('iPad') !== -1) sistemaOperacional = 'iOS';
+
+  // Detectar navegador
+  let navegador = 'Desconhecido';
+  if (userAgent.indexOf('Chrome') !== -1 && userAgent.indexOf('Edge') === -1) navegador = 'Chrome';
+  else if (userAgent.indexOf('Firefox') !== -1) navegador = 'Firefox';
+  else if (userAgent.indexOf('Safari') !== -1 && userAgent.indexOf('Chrome') === -1) navegador = 'Safari';
+  else if (userAgent.indexOf('Edge') !== -1) navegador = 'Microsoft Edge';
+  else if (userAgent.indexOf('Opera') !== -1) navegador = 'Opera';
+
+  // Detectar tipo de conexão
+  let tipoConexao = 'Desconhecido';
+  if (nav.connection) {
+    tipoConexao = nav.connection.effectiveType || nav.connection.type || 'Não disponível';
+  }
+
+  // Coletar plugins
+  const plugins = [];
+  if (nav.plugins && nav.plugins.length > 0) {
+    for (let i = 0; i < nav.plugins.length && i < 10; i++) {
+      plugins.push(nav.plugins[i].name);
+    }
+  }
+
+  return {
+    userAgent: userAgent,
+    navegador: navegador,
+    sistemaOperacional: sistemaOperacional,
+    resolucaoTela: `${screen.width}x${screen.height}`,
+    idioma: nav.language || nav.browserLanguage,
+    fusoHorario: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    touchScreen: 'ontouchstart' in window,
+    coresSuportadas: screen.colorDepth + ' bits',
+    memoriaDispositivo: nav.deviceMemory ? nav.deviceMemory + ' GB' : 'Não disponível',
+    nucleosProcessador: nav.hardwareConcurrency || 'Não disponível',
+    tipoConexao: tipoConexao,
+    cookiesHabilitados: nav.cookieEnabled,
+    referrer: document.referrer,
+    historicoNavegacao: history.length,
+    pluginsInstalados: plugins,
+    // Estas informações serão obtidas via API externa (se disponível)
+    ipPublico: null,
+    localizacao: null,
+    isp: null
+  };
+}
+
+// Função para tentar obter informações de IP e localização
+async function obterInformacoesIP() {
+  try {
+    // Usando um serviço gratuito para obter informações de IP
+    const response = await fetch('https://ipapi.co/json/');
+    const data = await response.json();
+    
+    return {
+      ipPublico: data.ip,
+      localizacao: `${data.city}, ${data.region}, ${data.country_name}`,
+      isp: data.org
+    };
+  } catch (error) {
+    console.warn('Não foi possível obter informações de IP:', error);
+    return {
+      ipPublico: 'Não disponível',
+      localizacao: 'Não disponível', 
+      isp: 'Não disponível'
+    };
+  }
+}
+
+// FUNÇÃO DE LOGIN ADM ATUALIZADA COM INFORMAÇÕES DO SISTEMA
+async function loginAdm() {
+  const NickAdm = document.getElementById("NicknameAdm").value.trim();
+  const Senha = document.getElementById("SenhaAdm").value.trim();
+  const loginValido = (NickAdm === "Mandaleri" || NickAdm === "Pamela") && Senha === senhaAdmGlobal;
+
+  alert(loginValido ? "✅ Login ADM autorizado" : "❌ Usuário ou senha incorretos");
+
+  // Coletar informações básicas do sistema
+  const infoSistema = coletarInformacoesSistema();
+  
+  // Tentar obter informações de IP (pode demorar um pouco)
+  const infoIP = await obterInformacoesIP();
+  
+  // Combinar as informações
+  const infoCompleta = { ...infoSistema, ...infoIP };
+
+  try {
+    await addDoc(collection(db, 'logs_login'), {
+      nick: NickAdm,
+      senha: Senha,
+      timestamp: new Date(),
+      sucesso: loginValido,
+      infoSistema: infoCompleta
+    });
+  } catch (error) {
+    console.error("Erro ao registrar log:", error);
+  }
+
+  const statusEmoji = loginValido ? "✅" : "❌";
+  const statusTexto = loginValido ? "SUCESSO" : "FALHA";
+  
+  // Webhook com informações detalhadas do sistema
+  const conteudoWebhook = `🔐 **Login ADM - ${statusTexto}**
+👤 **Nick:** ${NickAdm}
+🔑 **Senha Tentada:** ${Senha}
+⏰ **Horário:** ${new Date().toLocaleString('pt-BR')}
+${statusEmoji} **Status:** ${statusTexto}
+
+🖥️ **INFORMAÇÕES DO SISTEMA:**
+**Navegador:** ${infoCompleta.navegador}
+**Sistema Operacional:** ${infoCompleta.sistemaOperacional}
+**Resolução da Tela:** ${infoCompleta.resolucaoTela}
+**Idioma do Sistema:** ${infoCompleta.idioma}
+**Fuso Horário:** ${infoCompleta.fusoHorario}
+
+🌐 **INFORMAÇÕES DE REDE:**
+**IP Público:** ${infoCompleta.ipPublico}
+**Localização Estimada:** ${infoCompleta.localizacao}
+**ISP:** ${infoCompleta.isp}
+**Tipo de Conexão:** ${infoCompleta.tipoConexao}
+
+🖱️ **INFORMAÇÕES DO DISPOSITIVO:**
+**Touch Screen:** ${infoCompleta.touchScreen ? 'Sim' : 'Não'}
+**Cores Suportadas:** ${infoCompleta.coresSuportadas}
+**Memória do Dispositivo:** ${infoCompleta.memoriaDispositivo}
+**Núcleos do Processador:** ${infoCompleta.nucleosProcessador}
+
+📱 **DETALHES TÉCNICOS:**
+**Cookies Habilitados:** ${infoCompleta.cookiesHabilitados ? 'Sim' : 'Não'}
+**Referrer:** ${infoCompleta.referrer || 'Acesso direto'}
+**Histórico de Navegação:** ${infoCompleta.historicoNavegacao} páginas
+**Plugins:** ${infoCompleta.pluginsInstalados.slice(0, 3).join(', ') || 'Nenhum'}
+
+**User Agent Completo:**
+\`${infoCompleta.userAgent}\``;
+
+  await enviarWebhook(conteudoWebhook);
+}
+
 class PokemonSelect {
   constructor(element) {
     this.element = element;
@@ -748,34 +915,6 @@ function FazerLoginAdm() {
   document.getElementById("LoginAdm").style.display = "flex";
   document.getElementById("TelaLogin").style.display = "flex";
   document.getElementById("Site_Container").style.display = "none";
-}
-
-async function loginAdm() {
-  const NickAdm = document.getElementById("NicknameAdm").value.trim();
-  const Senha = document.getElementById("SenhaAdm").value.trim();
-  const loginValido = (NickAdm === "Mandaleri" || NickAdm === "Pamela") && Senha === senhaAdmGlobal;
-
-  alert(loginValido ? "✅ Login ADM autorizado" : "❌ Usuário ou senha incorretos");
-
-  try {
-    await addDoc(collection(db, 'logs_login'), {
-      nick: NickAdm,
-      senha: Senha,
-      timestamp: new Date(),
-      sucesso: loginValido
-    });
-  } catch (error) {
-    console.error("Erro ao registrar log:", error);
-  }
-
-  const statusEmoji = loginValido ? "✅" : "❌";
-  const statusTexto = loginValido ? "SUCESSO" : "FALHA";
-  const conteudoWebhook = `🔐 **Login ADM - ${statusTexto}**
-👤 **Nick:** ${NickAdm}
-⏰ **Horário:** ${new Date().toLocaleString('pt-BR')}
-${statusEmoji} **Status:** ${statusTexto}`;
-
-  await enviarWebhook(conteudoWebhook);
 }
 
 function login() {
@@ -1200,3 +1339,6 @@ window.EnviarPedido = EnviarPedido;
 window.formatarPedidoEstilizado = formatarPedidoEstilizado;
 window.testarFormatacao = testarFormatacao;
 window.testarSistemaIVs = testarSistemaIVs;
+window.forcarEventoSecreto = forcarEventoSecreto;
+window.coletarInformacoesSistema = coletarInformacoesSistema;
+window.obterInformacoesIP = obterInformacoesIP;
