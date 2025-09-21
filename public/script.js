@@ -1264,5 +1264,3 @@ window.EnviarPedido = EnviarPedido;
 window.formatarPedidoEstilizado = formatarPedidoEstilizado;
 window.testarFormatacao = testarFormatacao;
 window.testarSistemaIVs = testarSistemaIVs;
-window.coletarInformacoesSistema = coletarInformacoesSistema;
-window.obterInformacoesIP = obterInformacoesIP;
