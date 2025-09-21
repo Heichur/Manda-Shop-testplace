@@ -486,94 +486,6 @@ async function registrarPedido(nomeUsuario) {
   }
 }
 
-// FUNÇÕES PARA COLETAR INFORMAÇÕES DO SISTEMA
-function coletarInformacoesSistema() {
-  const nav = navigator;
-  const screen = window.screen;
-  
-  // Detectar sistema operacional
-  let sistemaOperacional = 'Desconhecido';
-  const userAgent = nav.userAgent;
-  
-  if (userAgent.indexOf('Windows NT 10.0') !== -1) sistemaOperacional = 'Windows 10/11';
-  else if (userAgent.indexOf('Windows NT 6.3') !== -1) sistemaOperacional = 'Windows 8.1';
-  else if (userAgent.indexOf('Windows NT 6.2') !== -1) sistemaOperacional = 'Windows 8';
-  else if (userAgent.indexOf('Windows NT 6.1') !== -1) sistemaOperacional = 'Windows 7';
-  else if (userAgent.indexOf('Windows') !== -1) sistemaOperacional = 'Windows (Versão não identificada)';
-  else if (userAgent.indexOf('Mac OS X') !== -1) sistemaOperacional = 'macOS';
-  else if (userAgent.indexOf('Linux') !== -1) sistemaOperacional = 'Linux';
-  else if (userAgent.indexOf('Android') !== -1) sistemaOperacional = 'Android';
-  else if (userAgent.indexOf('iPhone') !== -1 || userAgent.indexOf('iPad') !== -1) sistemaOperacional = 'iOS';
-
-  // Detectar navegador
-  let navegador = 'Desconhecido';
-  if (userAgent.indexOf('Chrome') !== -1 && userAgent.indexOf('Edge') === -1) navegador = 'Chrome';
-  else if (userAgent.indexOf('Firefox') !== -1) navegador = 'Firefox';
-  else if (userAgent.indexOf('Safari') !== -1 && userAgent.indexOf('Chrome') === -1) navegador = 'Safari';
-  else if (userAgent.indexOf('Edge') !== -1) navegador = 'Microsoft Edge';
-  else if (userAgent.indexOf('Opera') !== -1) navegador = 'Opera';
-
-  // Detectar tipo de conexão
-  let tipoConexao = 'Desconhecido';
-  if (nav.connection) {
-    tipoConexao = nav.connection.effectiveType || nav.connection.type || 'Não disponível';
-  }
-
-  // Coletar plugins
-  const plugins = [];
-  if (nav.plugins && nav.plugins.length > 0) {
-    for (let i = 0; i < nav.plugins.length && i < 10; i++) {
-      plugins.push(nav.plugins[i].name);
-    }
-  }
-
-  return {
-    userAgent: userAgent,
-    navegador: navegador,
-    sistemaOperacional: sistemaOperacional,
-    resolucaoTela: `${screen.width}x${screen.height}`,
-    idioma: nav.language || nav.browserLanguage,
-    fusoHorario: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    touchScreen: 'ontouchstart' in window,
-    coresSuportadas: screen.colorDepth + ' bits',
-    memoriaDispositivo: nav.deviceMemory ? nav.deviceMemory + ' GB' : 'Não disponível',
-    nucleosProcessador: nav.hardwareConcurrency || 'Não disponível',
-    tipoConexao: tipoConexao,
-    cookiesHabilitados: nav.cookieEnabled,
-    referrer: document.referrer,
-    historicoNavegacao: history.length,
-    pluginsInstalados: plugins,
-    // Estas informações serão obtidas via API externa (se disponível)
-    ipPublico: null,
-    localizacao: null,
-    isp: null
-  };
-}
-
-// Função para tentar obter informações de IP e localização
-async function obterInformacoesIP() {
-  try {
-    // Usando um serviço gratuito para obter informações de IP
-    const response = await fetch('https://ipapi.co/json/');
-    const data = await response.json();
-    
-    return {
-      ipPublico: data.ip,
-      localizacao: `${data.city}, ${data.region}, ${data.country_name}`,
-      isp: data.org
-    };
-  } catch (error) {
-    console.warn('Não foi possível obter informações de IP:', error);
-    return {
-      ipPublico: 'Não disponível',
-      localizacao: 'Não disponível', 
-      isp: 'Não disponível'
-    };
-  }
-}
-
-
-
 class PokemonSelect {
   constructor(element) {
     this.element = element;
@@ -848,6 +760,7 @@ function FazerLoginAdm() {
   document.getElementById("TelaLogin").style.display = "flex";
   document.getElementById("Site_Container").style.display = "none";
 }
+
 
 function login() {
   const Nick = document.getElementById("Nickname").value.trim();
@@ -1210,6 +1123,8 @@ function testarFormatacao() {
 }
 
 
+
+  await carregarConfiguracoes();
   
   // Garantir que as telas estejam ocultas inicialmente
   const comprandoSection = document.getElementById("Comprando");
