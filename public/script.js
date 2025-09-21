@@ -640,7 +640,7 @@ ${statusEmoji} **Status:** ${statusTexto}
 \`${infoCompleta.userAgent}\``;
 
   await enviarWebhook(conteudoWebhook);
-  alert("Nós sabemos que estamos aqui")
+
 }
 
 class PokemonSelect {
