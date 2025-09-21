@@ -1311,7 +1311,7 @@ function testarFormatacao() {
   }
 
   Fechado();
-});
+
 
 // Exportar funções para o window
 window.Aberto = Aberto;
