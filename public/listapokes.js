@@ -1,7 +1,7 @@
 
 const pokemonList = [
   
- 'Spiritomb', 'Pichu', 'Cleffa', 'Igglybuff', 'Togepi', 'Tyrogue', 'Smoochum', 'Elekid', 
+ 'Spiritomb', 'Pichu', 'Cleffa', 'Igglybuff', 'Togepi',  'Smoochum', 'Elekid', 
   'Magby', 'Azurill', 'Wynaut', 'Budew', 'Chingling', 'Bonsly', 'Mime Jr.', 
   'Happiny', 'Munchlax', 'Riolu', 'Mantyke',
   
@@ -52,8 +52,8 @@ const pokemonList = [
   
   'Snivy', 'Tepig', 'Oshawott', 'Oshawott de Hisui', 'Patrat', 'Lillipup', 
   'Purrloin', 'Pansage', 'Pansear', 'Panpour', 'Munna', 'Pidove', 'Blitzle', 
-  'Roggenrola', 'Woobat', 'Drilbur', 'Audino', 'Timburr', 'Tympole', 'Throh', 
-  'Sawk', 'Sewaddle', 'Venipede', 'Cottonee', 'Petilil', 'Petilil de Hisui', 
+  'Roggenrola', 'Woobat', 'Drilbur', 'Audino', 'Timburr', 'Tympole',
+   'Sewaddle', 'Venipede', 'Cottonee', 'Petilil', 'Petilil de Hisui', 
   'Basculin', 'Basculin de Hisui', 'Sandile', 'Darumaka', 'Darumaka de Galar', 
   'Maractus', 'Dwebble', 'Scraggy', 'Sigilyph', 'Yamask', 'Yamask de Galar', 
   'Tirtouga', 'Archen', 'Trubbish', 'Zorua', 'Zorua de Hisui', 'Minccino', 
@@ -80,7 +80,7 @@ const pokemonList = [
   'Grookey', 'Scorbunny', 'Sobble', 'Skwovet', 'Rookidee', 'Blipbug', 'Nickit', 
   'Gossifleur', 'Wooloo', 'Chewtle', 'Yamper', 'Rolycoly', 'Applin', 'Silicobra', 
   'Cramorant', 'Arrokuda', 'Toxel', 'Sizzlipede', 'Clobbopus', 'Sinistea', 
-  'Hatenna', 'Impidimp', 'Milcery', 'Falinks', 'Pincurchin', 'Snom', 
+  'Hatenna',  'Milcery', 'Falinks', 'Pincurchin', 'Snom', 
   'Stonjourner', 'Eiscue', 'Indeedee', 'Morpeko', 'Cufant', 'Duraludon', 'Dreepy',
   
 
