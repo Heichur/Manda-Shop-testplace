@@ -15,6 +15,542 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// ==================== POKEMON API INTEGRATION ====================
+
+class PokemonAPIManager {
+  constructor() {
+    this.pokemonList = [];
+    this.pokemonDetails = new Map();
+    this.isLoading = false;
+    this.isLoaded = false;
+    this.loadPromise = null;
+    
+    // Lista completa de IDs de Pokémon Lendários e Míticos
+    this.legendaryIds = new Set([
+      // Gen 1 - Lendários e Míticos
+      144, 145, 146, 150, 151, // Articuno, Zapdos, Moltres, Mewtwo, Mew
+      
+      // Gen 2 - Lendários e Míticos
+      243, 244, 245, 249, 250, 251, // Raikou, Entei, Suicune, Lugia, Ho-Oh, Celebi
+      
+      // Gen 3 - Lendários e Míticos
+      377, 378, 379, 380, 381, 382, 383, 384, 385, 386, // Regirock, Regice, Registeel, Latias, Latios, Kyogre, Groudon, Rayquaza, Jirachi, Deoxys
+      
+      // Gen 4 - Lendários e Míticos
+      480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, // Uxie, Mesprit, Azelf, Dialga, Palkia, Heatran, Regigigas, Giratina, Cresselia, Phione, Manaphy, Darkrai, Shaymin, Arceus
+      
+      // Gen 5 - Lendários e Míticos
+      494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649, // Victini, Cobalion, Terrakion, Virizion, Tornadus, Thundurus, Reshiram, Zekrom, Landorus, Kyurem, Keldeo, Meloetta, Genesect
+      
+      // Gen 6 - Lendários e Míticos
+      716, 717, 718, 719, 720, 721, // Xerneas, Yveltal, Zygarde, Diancie, Hoopa, Volcanion
+      
+      // Gen 7 - Lendários e Míticos
+      785, 786, 787, 788, 789, 790, 791, 792, 800, 801, 802, 807, 808, 809, // Tapu Koko, Tapu Lele, Tapu Bulu, Tapu Fini, Cosmog, Cosmoem, Solgaleo, Lunala, Necrozma, Magearna, Marshadow, Zeraora
+      
+      // Gen 8 - Lendários e Míticos
+      888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 898, // Zacian, Zamazenta, Eternatus, Kubfu, Urshifu, Regieleki, Regidrago, Glastrier, Spectrier, Calyrex, Zarude
+      
+      // Gen 9 - Lendários e Míticos
+      1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025 // Koraidon, Miraidon, Walking Wake, Iron Leaves, Okidogi, Munkidori, Fezandipiti, Ogerpon, Archaludon, Hydrapple, Gouging Fire, Raging Bolt, Iron Boulder, Iron Crown, Terapagos, Pecharunt
+    ]);
+  }
+
+  // Carrega a lista completa de Pokémon da PokeAPI
+  async loadPokemonList() {
+    if (this.isLoaded) return this.pokemonList;
+    if (this.isLoading) return this.loadPromise;
+    
+    this.isLoading = true;
+    
+    this.loadPromise = this._fetchPokemonList();
+    try {
+      await this.loadPromise;
+    } catch (error) {
+      this.isLoading = false;
+      throw error;
+    }
+    
+    return this.pokemonList;
+  }
+
+  async _fetchPokemonList() {
+    try {
+      console.log('🔄 Carregando Pokémon da PokeAPI...');
+      
+      const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=2000');
+      if (!response.ok) throw new Error('Falha ao buscar lista da PokeAPI');
+      
+      const data = await response.json();
+      
+      // Filtrar Pokémon removendo lendários e míticos
+      this.pokemonList = data.results
+        .map(pokemon => {
+          const id = this._extractIdFromUrl(pokemon.url);
+          
+          // Formatar nomes: primeira letra maiúscula, substituir hífens por espaços
+          const formattedName = pokemon.name
+            .split('-')
+            .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(' ');
+          
+          return {
+            id: id,
+            name: formattedName,
+            originalName: pokemon.name,
+            url: pokemon.url
+          };
+        })
+        .filter(pokemon => {
+          // ★ AQUI REMOVE TODOS OS LENDÁRIOS E MÍTICOS ★
+          return !this.legendaryIds.has(pokemon.id);
+        });
+      
+      // Ordenar por ID para manter ordem das gerações
+      this.pokemonList.sort((a, b) => a.id - b.id);
+      
+      this.isLoaded = true;
+      this.isLoading = false;
+      
+      console.log(`✅ ${this.pokemonList.length} Pokémon carregados com sucesso! (Lendários removidos)`);
+      
+    } catch (error) {
+      console.error('❌ Erro ao carregar PokeAPI:', error);
+      this.isLoading = false;
+      
+      // Fallback para lista básica (também sem lendários)
+      this.pokemonList = this._getFallbackList();
+      this.isLoaded = true;
+      
+      console.log('⚠️ Usando lista de fallback com Pokémon básicos');
+    }
+  }
+
+  _extractIdFromUrl(url) {
+    const matches = url.match(/\/(\d+)\/$/);
+    return matches ? parseInt(matches[1]) : 0;
+  }
+
+  _getFallbackList() {
+    return [
+      { id: 1, name: 'Bulbasaur', originalName: 'bulbasaur' },
+      { id: 4, name: 'Charmander', originalName: 'charmander' },
+      { id: 7, name: 'Squirtle', originalName: 'squirtle' },
+      { id: 25, name: 'Pikachu', originalName: 'pikachu' },
+      { id: 39, name: 'Jigglypuff', originalName: 'jigglypuff' },
+      { id: 94, name: 'Gengar', originalName: 'gengar' },
+      { id: 143, name: 'Snorlax', originalName: 'snorlax' },
+      { id: 150, name: 'Mewtwo', originalName: 'mewtwo' },
+      { id: 151, name: 'Mew', originalName: 'mew' }
+    ];
+  }
+
+  // Busca Pokémon por nome (busca parcial)
+  searchPokemon(query) {
+    if (!query || !this.isLoaded) return [];
+    
+    const searchTerm = this._normalize(query);
+    
+    return this.pokemonList.filter(pokemon => {
+      const pokemonName = this._normalize(pokemon.name);
+      const pokemonOriginal = this._normalize(pokemon.originalName);
+      
+      return pokemonName.includes(searchTerm) || pokemonOriginal.includes(searchTerm);
+    });
+  }
+
+  // Encontra Pokémon exato por nome
+  findExactPokemon(name) {
+    if (!name || !this.isLoaded) return null;
+    
+    const searchTerm = this._normalize(name);
+    
+    return this.pokemonList.find(pokemon => {
+      const pokemonName = this._normalize(pokemon.name);
+      const pokemonOriginal = this._normalize(pokemon.originalName);
+      
+      return pokemonName === searchTerm || pokemonOriginal === searchTerm;
+    });
+  }
+
+  // Obtém detalhes de um Pokémon específico (cache)
+  async getPokemonDetails(pokemonName) {
+    const cacheKey = pokemonName.toLowerCase();
+    
+    if (this.pokemonDetails.has(cacheKey)) {
+      return this.pokemonDetails.get(cacheKey);
+    }
+
+    try {
+      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${cacheKey}`);
+      if (!response.ok) return null;
+      
+      const pokemon = await response.json();
+      
+      const details = {
+        id: pokemon.id,
+        name: pokemon.name,
+        height: pokemon.height,
+        weight: pokemon.weight,
+        types: pokemon.types.map(type => type.type.name),
+        sprite: pokemon.sprites.front_default,
+        abilities: pokemon.abilities.map(ability => ({
+          name: ability.ability.name,
+          isHidden: ability.is_hidden
+        })),
+        stats: pokemon.stats.map(stat => ({
+          name: stat.stat.name,
+          value: stat.base_stat
+        }))
+      };
+
+      this.pokemonDetails.set(cacheKey, details);
+      return details;
+      
+    } catch (error) {
+      console.error(`Erro ao buscar detalhes de ${pokemonName}:`, error);
+      return null;
+    }
+  }
+
+  // Normaliza texto para comparação
+  _normalize(text) {
+    if (!text) return '';
+    return text
+      .toLowerCase()
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '');
+  }
+
+  // Retorna todos os Pokémon (já filtrados sem lendários)
+  getAllPokemon() {
+    return this.pokemonList;
+  }
+
+  // Verifica se um Pokémon é lendário pelo ID
+  isLegendary(pokemonId) {
+    return this.legendaryIds.has(pokemonId);
+  }
+
+  // Verifica se um Pokémon é lendário pelo nome
+  isPokemonLegendary(pokemonName) {
+    const pokemon = this.findExactPokemon(pokemonName);
+    return pokemon ? this.isLegendary(pokemon.id) : false;
+  }
+
+  // Pokémon aleatório
+  getRandomPokemon() {
+    if (!this.isLoaded || this.pokemonList.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * this.pokemonList.length);
+    return this.pokemonList[randomIndex];
+  }
+
+  // Filtra por geração
+  getPokemonByGeneration(generation) {
+    if (!this.isLoaded) return [];
+    
+    const ranges = {
+      1: [1, 151], 2: [152, 251], 3: [252, 386], 4: [387, 493], 5: [494, 649],
+      6: [650, 721], 7: [722, 809], 8: [810, 905], 9: [906, 1025]
+    };
+
+    const range = ranges[generation];
+    if (!range) return [];
+
+    return this.pokemonList.filter(p => p.id >= range[0] && p.id <= range[1]);
+  }
+}
+
+// Instância global do gerenciador de Pokémon
+window.pokemonAPI = new PokemonAPIManager();
+
+// ==================== POKEMON SELECT COMPONENT (ATUALIZADO) ====================
+
+class PokemonSelect {
+  constructor(element) {
+    this.element = element;
+    this.trigger = element.querySelector('.pokemon-select-trigger');
+    this.optionsContainer = element.querySelector('.pokemon-select-options');
+    this.searchInput = element.querySelector('.pokemon-search-input');
+    this.optionsList = element.querySelector('.pokemon-options-list');
+    this.placeholderElement = element.querySelector('.pokemon-select-placeholder');
+    
+    this.selectedValue = '';
+    this.selectedPokemon = null;
+    this.isOpen = false;
+    this.boundDocumentClickHandler = null;
+    this.currentOptions = [];
+    
+    this.init();
+  }
+  
+  async init() {
+    // Mostrar loading
+    this.showLoading();
+    
+    try {
+      await window.pokemonAPI.loadPokemonList();
+      this.createOptions();
+      this.bindEvents();
+      this.hideLoading();
+    } catch (error) {
+      console.error('Erro ao inicializar PokemonSelect:', error);
+      this.showError();
+    }
+  }
+
+  showLoading() {
+    this.optionsList.innerHTML = '<div class="pokemon-loading">🔄 Carregando Pokémon...</div>';
+  }
+
+  showError() {
+    this.optionsList.innerHTML = '<div class="pokemon-error">❌ Erro ao carregar Pokémon</div>';
+  }
+
+  hideLoading() {
+    // Remove loading, as opções já foram criadas
+  }
+  
+  createOptions() {
+    this.optionsList.innerHTML = '';
+    this.currentOptions = window.pokemonAPI.getAllPokemon();
+    
+    this.currentOptions.forEach(pokemon => {
+      const option = document.createElement('div');
+      option.className = 'pokemon-option';
+      option.innerHTML = `
+        <span class="pokemon-name">${pokemon.name}</span>
+        <span class="pokemon-id">#${pokemon.id.toString().padStart(3, '0')}</span>
+      `;
+      option.dataset.value = pokemon.name;
+      option.dataset.originalName = pokemon.originalName;
+      
+      option.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.selectOption(pokemon);
+      });
+      
+      this.optionsList.appendChild(option);
+    });
+  }
+  
+  bindEvents() {
+    this.trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.toggle();
+    });
+    
+    this.trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.toggle();
+      } else if (e.key === 'Escape') {
+        this.close();
+      }
+    });
+    
+    this.searchInput.addEventListener('input', (e) => {
+      this.filterOptions(e.target.value);
+    });
+   
+    this.searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        this.close();
+      }
+      e.stopPropagation();
+    });
+   
+    this.searchInput.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    this.optionsContainer.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
+  
+  toggle() {
+    if (this.isOpen) {
+      this.close();
+    } else {
+      this.open();
+    }
+  }
+  
+  open() {
+    if (this.isOpen) return;
+    
+    this.isOpen = true;
+    this.trigger.classList.add('active');
+    this.optionsContainer.classList.add('active');
+    
+    this.boundDocumentClickHandler = (e) => {
+      if (!this.element.contains(e.target)) {
+        this.close();
+      }
+    };
+    
+    setTimeout(() => {
+      document.addEventListener('click', this.boundDocumentClickHandler, true);
+      this.searchInput.focus();
+    }, 50);
+    
+    this.searchInput.value = '';
+    this.filterOptions('');
+  }
+  
+  close() {
+    if (!this.isOpen) return;
+    
+    this.isOpen = false;
+    this.trigger.classList.remove('active');
+    this.optionsContainer.classList.remove('active');
+    
+    if (this.boundDocumentClickHandler) {
+      document.removeEventListener('click', this.boundDocumentClickHandler, true);
+      this.boundDocumentClickHandler = null;
+    }
+    
+    if (document.activeElement === this.searchInput) {
+      this.trigger.focus();
+    }
+  }
+  
+  selectOption(pokemon) {
+    this.selectedValue = pokemon.name;
+    this.selectedPokemon = pokemon;
+    
+    this.placeholderElement.textContent = pokemon.name;
+    this.placeholderElement.classList.remove('pokemon-select-placeholder');
+    this.placeholderElement.classList.add('pokemon-select-selected');
+    
+    // Atualizar input oculto se existir
+    const nomeInput = document.getElementById("NomeDosPoke");
+    if (nomeInput) {
+      nomeInput.value = pokemon.name;
+    }
+    
+    // Marcar opção como selecionada
+    this.optionsList.querySelectorAll('.pokemon-option').forEach(opt => {
+      opt.classList.remove('selected');
+      if (opt.dataset.value === pokemon.name) {
+        opt.classList.add('selected');
+      }
+    });
+    
+    this.close();
+    
+    // Disparar evento customizado
+    this.element.dispatchEvent(new CustomEvent('pokemonSelected', {
+      detail: { pokemon: pokemon }
+    }));
+  }
+  
+  filterOptions(searchTerm) {
+    if (!searchTerm.trim()) {
+      // Mostrar todos
+      this.currentOptions = window.pokemonAPI.getAllPokemon();
+    } else {
+      // Filtrar usando a API
+      this.currentOptions = window.pokemonAPI.searchPokemon(searchTerm);
+    }
+
+    // Limpar e recriar opções
+    this.optionsList.innerHTML = '';
+    
+    if (this.currentOptions.length === 0) {
+      const noResults = document.createElement('div');
+      noResults.className = 'pokemon-no-results';
+      noResults.style.padding = '15px';
+      noResults.style.textAlign = 'center';
+      noResults.style.color = '#666';
+      noResults.innerHTML = `
+        <p>Nenhum Pokémon encontrado para "${searchTerm}"</p>
+        <small>Tente um nome diferente ou verifique a ortografia</small>
+      `;
+      this.optionsList.appendChild(noResults);
+      return;
+    }
+
+    // Mostrar apenas os primeiros 50 resultados para performance
+    const limitedOptions = this.currentOptions.slice(0, 50);
+    
+    limitedOptions.forEach(pokemon => {
+      const option = document.createElement('div');
+      option.className = 'pokemon-option';
+      option.innerHTML = `
+        <span class="pokemon-name">${pokemon.name}</span>
+        <span class="pokemon-id">#${pokemon.id.toString().padStart(3, '0')}</span>
+      `;
+      option.dataset.value = pokemon.name;
+      option.dataset.originalName = pokemon.originalName;
+      
+      option.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.selectOption(pokemon);
+      });
+      
+      this.optionsList.appendChild(option);
+    });
+
+    // Mostrar contador se há mais resultados
+    if (this.currentOptions.length > 50) {
+      const moreResults = document.createElement('div');
+      moreResults.className = 'pokemon-more-results';
+      moreResults.style.padding = '10px';
+      moreResults.style.textAlign = 'center';
+      moreResults.style.color = '#666';
+      moreResults.style.fontStyle = 'italic';
+      moreResults.textContent = `... e mais ${this.currentOptions.length - 50} resultados. Continue digitando para refinar.`;
+      this.optionsList.appendChild(moreResults);
+    }
+  }
+  
+  getValue() {
+    return this.selectedValue;
+  }
+
+  getSelectedPokemon() {
+    return this.selectedPokemon;
+  }
+  
+  reset() {
+    this.selectedValue = '';
+    this.selectedPokemon = null;
+    this.placeholderElement.textContent = 'Selecione um Pokémon...';
+    this.placeholderElement.classList.add('pokemon-select-placeholder');
+    this.placeholderElement.classList.remove('pokemon-select-selected');
+    
+    const nomeInput = document.getElementById("NomeDosPoke");
+    if (nomeInput) {
+      nomeInput.value = '';
+    }
+    
+    this.optionsList.querySelectorAll('.pokemon-option').forEach(opt => {
+      opt.classList.remove('selected');
+    });
+    
+    if (this.isOpen) {
+      this.close();
+    }
+  }
+  
+  destroy() {
+    if (this.boundDocumentClickHandler) {
+      document.removeEventListener('click', this.boundDocumentClickHandler, true);
+    }
+  }
+}
+
+// ==================== SISTEMA ORIGINAL (ATUALIZADO) ====================
+
 let senhaAdmGlobal = "";  
 let webhookUrlGlobal = "";
 let ultimoPedidoTimestamp = 0;
@@ -46,7 +582,6 @@ function verificarEventoSecreto() {
   return chance === 1; // 1 em 1000 chance
 }
 
-
 // EVENTO SECRETO - Função para executar o evento
 function executarEventoSecreto() {
   // Primeira mensagem
@@ -57,7 +592,6 @@ function executarEventoSecreto() {
   imagemEvento.id = 'eventoSecreto';
   
   const img = document.createElement('img');
-
   img.src = 'img/Umbreon_Secreto.png'; 
   
   // Fallback caso a imagem não carregue
@@ -82,88 +616,7 @@ function executarEventoSecreto() {
   }, 3000);
 }
 
-function Aberto() {
-  sistemaAberto = true;
-  bloquearBotoes();
-}
-
-function Fechado() {
-  sistemaAberto = false;
-  desbloquearBotoes();
-}
-
-function verificarSistemaAberto() {
-  if (sistemaAberto) {
-    alert("⚠️ Uma operação já está em andamento. Aguarde ou feche a tela atual.");
-    return true;
-  }
-  return false;
-}
-
-function bloquearBotoes() {
-  // Lista de IDs dos botões principais
-  const botoesBloqueados = [
-    'btnLogin',
-    'btnLoginAdm', 
-    'btnTabela',
-    'btnComprar',
-    'btnTopCompradores',
-    'btnSobreNos'
-  ];
-  
-  // Bloquear por IDs específicos
-  botoesBloqueados.forEach(id => {
-    const botao = document.getElementById(id);
-    if (botao) {
-      botao.disabled = true;
-      botao.style.opacity = '0.5';
-      botao.style.cursor = 'not-allowed';
-      botao.setAttribute('data-bloqueado', 'true');
-    }
-  });
-  
-  // Bloquear por classes CSS (fallback)
-  const botoes = document.querySelectorAll('.botao-principal, .btn-menu, button[onclick*="Fazer"], button[onclick*="Comprar"], button[onclick*="Preços"], button[onclick*="Mostrar"], button[onclick*="Sobre"]');
-  botoes.forEach(botao => {
-    if (!botao.getAttribute('data-bloqueado')) {
-      botao.disabled = true;
-      botao.style.opacity = '0.5';
-      botao.style.cursor = 'not-allowed';
-      botao.setAttribute('data-bloqueado', 'true');
-    }
-  });
-}
-
-function desbloquearBotoes() {
-  // Desbloquear por IDs específicos
-  const botoesBloqueados = [
-    'btnLogin',
-    'btnLoginAdm',
-    'btnTabela', 
-    'btnComprar',
-    'btnTopCompradores',
-    'btnSobreNos'
-  ];
-  
-  botoesBloqueados.forEach(id => {
-    const botao = document.getElementById(id);
-    if (botao) {
-      botao.disabled = false;
-      botao.style.opacity = '1';
-      botao.style.cursor = 'pointer';
-      botao.removeAttribute('data-bloqueado');
-    }
-  });
-  
-  // Desbloquear todos os botões marcados
-  const botoes = document.querySelectorAll('button[data-bloqueado="true"]');
-  botoes.forEach(botao => {
-    botao.disabled = false;
-    botao.style.opacity = '1';
-    botao.style.cursor = 'pointer';
-    botao.removeAttribute('data-bloqueado');
-  });
-}
+// ==================== VALIDAÇÃO DE POKÉMON (ATUALIZADA) ====================
 
 function normalizarNome(nome) {
   if (!nome || typeof nome !== 'string') return '';
@@ -176,21 +629,24 @@ function normalizarNome(nome) {
     .replace(/[^a-z0-9]/g, '');
 }
 
-function encontrarPokemonExato(nomeDigitado) {
-  if (typeof pokemonList === 'undefined' || !Array.isArray(pokemonList)) {
+async function encontrarPokemonExato(nomeDigitado) {
+  try {
+    // Garantir que a API está carregada
+    if (!window.pokemonAPI.isLoaded) {
+      await window.pokemonAPI.loadPokemonList();
+    }
+    
+    const pokemon = window.pokemonAPI.findExactPokemon(nomeDigitado);
+    
+    if (pokemon) {
+      return { encontrado: true, pokemon: pokemon.name };
+    }
+    
+    return { encontrado: false };
+  } catch (error) {
+    console.error('Erro ao buscar Pokémon:', error);
     return { encontrado: false };
   }
-  
-  const nomeNormalizado = normalizarNome(nomeDigitado);
-  if (!nomeNormalizado) return { encontrado: false };
-  
-  for (const pokemon of pokemonList) {
-    if (pokemon && normalizarNome(pokemon) === nomeNormalizado) {
-      return { encontrado: true, pokemon: pokemon };
-    }
-  }
-  
-  return { encontrado: false };
 }
 
 function verificarNomeImpropio(nome) {
@@ -203,7 +659,7 @@ function verificarNomeImpropio(nome) {
   );
 }
 
-function validarNomePokemon(nomeDigitado) {
+async function validarNomePokemon(nomeDigitado) {
   if (!nomeDigitado || nomeDigitado.trim() === '') {
     return { valido: false, tipo: 'vazio', mensagem: 'Digite o nome de um Pokémon' };
   }
@@ -216,9 +672,19 @@ function validarNomePokemon(nomeDigitado) {
     };
   }
   
-  const resultado = encontrarPokemonExato(nomeDigitado);
+  const resultado = await encontrarPokemonExato(nomeDigitado);
   
   if (resultado.encontrado) {
+    // Verificar se é lendário
+    const isLegendary = window.pokemonAPI.isPokemonLegendary(nomeDigitado);
+    if (isLegendary) {
+      return {
+        valido: false,
+        tipo: 'legendario',
+        mensagem: '🚫 Pokémon Lendários e Míticos não estão disponíveis para compra!'
+      };
+    }
+    
     return { 
       valido: true, 
       tipo: 'exato', 
@@ -228,10 +694,12 @@ function validarNomePokemon(nomeDigitado) {
     return { 
       valido: false, 
       tipo: 'naoEncontrado', 
-      mensagem: `❓ "${nomeDigitado}" não foi encontrado!\n\n⚠️ Tem certeza que deseja continuar?` 
+      mensagem: `❓ "${nomeDigitado}" não foi encontrado na PokeAPI!\n\n⚠️ Tem certeza que deseja continuar?` 
     };
   }
 }
+
+// ==================== RESTO DO SISTEMA ORIGINAL ====================
 
 function verificarCooldown() {
   const tempoRestante = COOLDOWN_PEDIDOS - (Date.now() - ultimoPedidoTimestamp);
@@ -486,227 +954,87 @@ async function registrarPedido(nomeUsuario) {
   }
 }
 
-class PokemonSelect {
-  constructor(element) {
-    this.element = element;
-    this.trigger = element.querySelector('.pokemon-select-trigger');
-    this.optionsContainer = element.querySelector('.pokemon-select-options');
-    this.searchInput = element.querySelector('.pokemon-search-input');
-    this.optionsList = element.querySelector('.pokemon-options-list');
-    this.placeholderElement = element.querySelector('.pokemon-select-placeholder');
-    
-    this.selectedValue = '';
-    this.isOpen = false;
-    this.boundDocumentClickHandler = null;
-    
-    this.init();
-  }
-  
-  init() {
-    if (typeof pokemonList !== 'undefined' && Array.isArray(pokemonList)) {
-      this.createOptions();
-      this.bindEvents();
-    } else {
-      console.warn('Lista de Pokémons não encontrada');
-    }
-  }
-  
-  createOptions() {
-    this.optionsList.innerHTML = '';
-    
-    const pokemonsValidos = pokemonList.filter(pokemon => 
-      pokemon && typeof pokemon === 'string' && pokemon.trim() !== ''
-    );
-    
-    pokemonsValidos.forEach(pokemon => {
-      const option = document.createElement('div');
-      option.className = 'pokemon-option';
-      option.textContent = pokemon;
-      option.dataset.value = pokemon;
-      
-      option.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.selectOption(pokemon);
-      });
-      
-      this.optionsList.appendChild(option);
-    });
-  }
-  
-  bindEvents() {
-    this.trigger.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.toggle();
-    });
-    
-    this.trigger.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        this.toggle();
-      } else if (e.key === 'Escape') {
-        this.close();
-      }
-    });
-    
-    this.searchInput.addEventListener('input', (e) => {
-      this.filterOptions(e.target.value);
-    });
-   
-    this.searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        this.close();
-      }
-      e.stopPropagation();
-    });
-   
-    this.searchInput.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    });
+// ==================== CONTROLE DE SISTEMA ====================
 
-    this.optionsContainer.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-  }
-  
-  toggle() {
-    if (this.isOpen) {
-      this.close();
-    } else {
-      this.open();
-    }
-  }
-  
-  open() {
-    if (this.isOpen) return;
-    
-    this.isOpen = true;
-    this.trigger.classList.add('active');
-    this.optionsContainer.classList.add('active');
-    
-    this.boundDocumentClickHandler = (e) => {
-      if (!this.element.contains(e.target)) {
-        this.close();
-      }
-    };
-    
-    setTimeout(() => {
-      document.addEventListener('click', this.boundDocumentClickHandler, true);
-      this.searchInput.focus();
-    }, 50);
-    
-    this.searchInput.value = '';
-    this.filterOptions('');
-  }
-  
-  close() {
-    if (!this.isOpen) return;
-    
-    this.isOpen = false;
-    this.trigger.classList.remove('active');
-    this.optionsContainer.classList.remove('active');
-    
-    if (this.boundDocumentClickHandler) {
-      document.removeEventListener('click', this.boundDocumentClickHandler, true);
-      this.boundDocumentClickHandler = null;
-    }
-    
-    if (document.activeElement === this.searchInput) {
-      this.trigger.focus();
-    }
-  }
-  
-  selectOption(pokemon) {
-    this.selectedValue = pokemon;
-    
-    this.placeholderElement.textContent = pokemon;
-    this.placeholderElement.classList.remove('pokemon-select-placeholder');
-    this.placeholderElement.classList.add('pokemon-select-selected');
-    
-    const nomeInput = document.getElementById("NomeDosPoke");
-    if (nomeInput) {
-      nomeInput.value = pokemon;
-    }
-    
-    this.optionsList.querySelectorAll('.pokemon-option').forEach(opt => {
-      opt.classList.remove('selected');
-      if (opt.dataset.value === pokemon) {
-        opt.classList.add('selected');
-      }
-    });
-    
-    this.close();
-    
-    this.element.dispatchEvent(new CustomEvent('pokemonSelected', {
-      detail: { pokemon: pokemon }
-    }));
-  }
-  
-  filterOptions(searchTerm) {
-    const normalizedSearch = searchTerm.toLowerCase().trim();
-    let visibleCount = 0;
-    
-    this.optionsList.querySelectorAll('.pokemon-option').forEach(option => {
-      const pokemonName = option.textContent.toLowerCase();
-      
-      if (pokemonName.includes(normalizedSearch)) {
-        option.classList.remove('hidden');
-        visibleCount++;
-      } else {
-        option.classList.add('hidden');
-      }
-    });
-    
-    let noResultsMsg = this.optionsList.querySelector('.pokemon-no-results');
-    if (visibleCount === 0 && searchTerm.trim() !== '') {
-      if (!noResultsMsg) {
-        noResultsMsg = document.createElement('div');
-        noResultsMsg.className = 'pokemon-no-results';
-        noResultsMsg.style.padding = '10px';
-        noResultsMsg.style.textAlign = 'center';
-        noResultsMsg.style.color = '#666';
-        this.optionsList.appendChild(noResultsMsg);
-      }
-      noResultsMsg.textContent = `Nenhum Pokémon encontrado para "${searchTerm}"`;
-      noResultsMsg.style.display = 'block';
-    } else if (noResultsMsg) {
-      noResultsMsg.style.display = 'none';
-    }
-  }
-  
-  getValue() {
-    return this.selectedValue;
-  }
-  
-  reset() {
-    this.selectedValue = '';
-    this.placeholderElement.textContent = 'Selecione um Pokémon...';
-    this.placeholderElement.classList.add('pokemon-select-placeholder');
-    this.placeholderElement.classList.remove('pokemon-select-selected');
-    
-    const nomeInput = document.getElementById("NomeDosPoke");
-    if (nomeInput) {
-      nomeInput.value = '';
-    }
-    
-    this.optionsList.querySelectorAll('.pokemon-option').forEach(opt => {
-      opt.classList.remove('selected');
-    });
-    
-    if (this.isOpen) {
-      this.close();
-    }
-  }
-  
-  destroy() {
-    if (this.boundDocumentClickHandler) {
-      document.removeEventListener('click', this.boundDocumentClickHandler, true);
-    }
-  }
+function Aberto() {
+  sistemaAberto = true;
+  bloquearBotoes();
 }
+
+function Fechado() {
+  sistemaAberto = false;
+  desbloquearBotoes();
+}
+
+function verificarSistemaAberto() {
+  if (sistemaAberto) {
+    alert("⚠️ Uma operação já está em andamento. Aguarde ou feche a tela atual.");
+    return true;
+  }
+  return false;
+}
+
+function bloquearBotoes() {
+  const botoesBloqueados = [
+    'btnLogin',
+    'btnLoginAdm', 
+    'btnTabela',
+    'btnComprar',
+    'btnTopCompradores',
+    'btnSobreNos'
+  ];
+  
+  botoesBloqueados.forEach(id => {
+    const botao = document.getElementById(id);
+    if (botao) {
+      botao.disabled = true;
+      botao.style.opacity = '0.5';
+      botao.style.cursor = 'not-allowed';
+      botao.setAttribute('data-bloqueado', 'true');
+    }
+  });
+  
+  const botoes = document.querySelectorAll('.botao-principal, .btn-menu, button[onclick*="Fazer"], button[onclick*="Comprar"], button[onclick*="Preços"], button[onclick*="Mostrar"], button[onclick*="Sobre"]');
+  botoes.forEach(botao => {
+    if (!botao.getAttribute('data-bloqueado')) {
+      botao.disabled = true;
+      botao.style.opacity = '0.5';
+      botao.style.cursor = 'not-allowed';
+      botao.setAttribute('data-bloqueado', 'true');
+    }
+  });
+}
+
+function desbloquearBotoes() {
+  const botoesBloqueados = [
+    'btnLogin',
+    'btnLoginAdm',
+    'btnTabela', 
+    'btnComprar',
+    'btnTopCompradores',
+    'btnSobreNos'
+  ];
+  
+  botoesBloqueados.forEach(id => {
+    const botao = document.getElementById(id);
+    if (botao) {
+      botao.disabled = false;
+      botao.style.opacity = '1';
+      botao.style.cursor = 'pointer';
+      botao.removeAttribute('data-bloqueado');
+    }
+  });
+  
+  const botoes = document.querySelectorAll('button[data-bloqueado="true"]');
+  botoes.forEach(botao => {
+    botao.disabled = false;
+    botao.style.opacity = '1';
+    botao.style.cursor = 'pointer';
+    botao.removeAttribute('data-bloqueado');
+  });
+}
+
+// ==================== FUNÇÃO DE INICIALIZAÇÃO ====================
 
 function inicializarPokemonSelect() {
   const pokemonSelectElement = document.getElementById('pokemonSelect');
@@ -727,10 +1055,11 @@ function inicializarPokemonSelect() {
   }
 }
 
+// ==================== FUNÇÕES DA INTERFACE ====================
+
 function FazerLogin() {
   if (verificarSistemaAberto()) return;
   
-  // VERIFICAÇÃO DO EVENTO SECRETO
   if (verificarEventoSecreto()) {
     executarEventoSecreto();
     return;
@@ -747,7 +1076,6 @@ function FazerLogin() {
 function FazerLoginAdm() {
   if (verificarSistemaAberto()) return;
   
-  // VERIFICAÇÃO DO EVENTO SECRETO
   if (verificarEventoSecreto()) {
     executarEventoSecreto();
     return;
@@ -760,7 +1088,6 @@ function FazerLoginAdm() {
   document.getElementById("TelaLogin").style.display = "flex";
   document.getElementById("Site_Container").style.display = "none";
 }
-
 
 function login() {
   const Nick = document.getElementById("Nickname").value.trim();
@@ -787,7 +1114,6 @@ function Comprar() {
   
   if (verificarSistemaAberto()) return;
   
-  // VERIFICAÇÃO DO EVENTO SECRETO
   if (verificarEventoSecreto()) {
     executarEventoSecreto();
     return;
@@ -910,6 +1236,8 @@ function FecharTabela() {
   Fechado();
 }
 
+// ==================== ENVIO DE PEDIDO (PRINCIPAL) ====================
+
 async function EnviarPedido() {
   let pokeNome = '';
   if (window.pokemonSelectInstance) {
@@ -933,11 +1261,11 @@ async function EnviarPedido() {
   }
 
   if (!pokeNome) {
-    alert("Por favor, digite o nome de um Pokémon.");
+    alert("Por favor, selecione ou digite o nome de um Pokémon.");
     return;
   }
 
-  const validacaoPokemon = validarNomePokemon(pokeNome);
+  const validacaoPokemon = await validarNomePokemon(pokeNome);
   
   if (!validacaoPokemon.valido) {
     if (validacaoPokemon.tipo === 'improprio') {
@@ -976,17 +1304,6 @@ async function EnviarPedido() {
 
   const precoTotal = calculoIVs.preco + precoBreedavel + precoHidden + precoEggMoves;
   
-  console.log('=== DEBUG CÁLCULO DE PREÇOS ===');
-  console.log('Preço IVs:', calculoIVs.preco);
-  console.log('Preço Breedável:', precoBreedavel);
-  console.log('Preço Hidden:', precoHidden);
-  console.log('Preço Egg Moves:', precoEggMoves);
-  console.log('Egg Moves String:', '"' + eggMovesStr + '"');
-  console.log('Castrado/Breedável:', '"' + castradoOuBreedavel + '"');
-  console.log('Hidden Habilidade:', hiddenHabilidade);
-  console.log('Total:', precoTotal);
-  console.log('===============================');
-  
   const nomeParaPedido = validacaoPokemon.valido ? validacaoPokemon.pokemon : pokeNome;
 
   const pedidoData = {
@@ -1009,11 +1326,6 @@ async function EnviarPedido() {
     timestamp: new Date(),
     status: "pendente"
   };
-
-  console.log('=== DEBUG DADOS DO PEDIDO ===');
-  console.log('IVs Zerados:', dadosIVs.statsZerados);
-  console.log('Informações Adicionais:', dadosIVs.informacoesAdicionais);
-  console.log('============================');
 
   const previewFormatado = formatarPedidoEstilizado(pedidoData, dadosIVs, calculoIVs);
   
@@ -1039,6 +1351,7 @@ async function EnviarPedido() {
 - IVs: ${dadosIVs.tipoIV}${calculoIVs.foiUpgradado ? ` → ${calculoIVs.tipoFinal} (Upgrade!)` : ''}
 - Preço total: ${Math.round(precoTotal/1000)}k`);
 
+    // Limpar formulário
     if (window.pokemonSelectInstance) {
       window.pokemonSelectInstance.reset();
     }
@@ -1061,6 +1374,8 @@ async function EnviarPedido() {
     btnEnviar.disabled = false;
   }
 }
+
+// ==================== FUNÇÕES DE TESTE ====================
 
 function testarSistemaIVs() {
   const testes = [
@@ -1091,39 +1406,9 @@ Explicação: ${calculo.foiUpgradado ? calculo.detalhesUpgrade : 'Sem upgrade'}
   });
 }
 
-function testarFormatacao() {
-  const pedidoExemplo = {
-    nomeUsuario: "heichur",
-    nickDiscord: "heichur", 
-    pokemon: "Pichu",
-    castradoOuBreedavel: "castrado",
-    natureza: "jolly",
-    habilidades: "static",
-    sexo: "Macho",
-    ivsZerados: "0atk",
-    eggMoves: "fake out",
-    hiddenHabilidade: false,
-    precoTotal: 100000
-  };
+// ==================== INICIALIZAÇÃO ====================
 
-  const dadosIVsExemplo = {
-    tipoIV: "F5",
-    statsZerados: ["0atk"],
-    informacoesAdicionais: []
-  };
-
-  const calculoIVsExemplo = {
-    tipoFinal: "F6",
-    foiUpgradado: true
-  };
-
-  const resultado = formatarPedidoEstilizado(pedidoExemplo, dadosIVsExemplo, calculoIVsExemplo);
-  console.log(resultado);
-  return resultado;
-}
-
-
-
+(async function inicializar() {
   await carregarConfiguracoes();
   
   // Garantir que as telas estejam ocultas inicialmente
@@ -1133,6 +1418,7 @@ function testarFormatacao() {
   if (comprandoSection) comprandoSection.style.display = "none";
   if (topCompradoresSection) topCompradoresSection.style.display = "none";
   
+  // Observer para limpar PokemonSelect quando a tela for fechada
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
@@ -1156,10 +1442,20 @@ function testarFormatacao() {
     });
   }
 
+  // Pré-carregar a lista de Pokémon em background
+  try {
+    console.log('🔄 Pré-carregando lista de Pokémon...');
+    await window.pokemonAPI.loadPokemonList();
+    console.log('✅ Lista de Pokémon pré-carregada com sucesso!');
+  } catch (error) {
+    console.warn('⚠️ Erro ao pré-carregar lista:', error);
+  }
+
   Fechado();
+})();
 
+// ==================== EXPORTS GLOBAIS ====================
 
-// Exportar funções para o window
 window.Aberto = Aberto;
 window.Fechado = Fechado;
 window.verificarSistemaAberto = verificarSistemaAberto;
@@ -1176,5 +1472,4 @@ window.VoltarParaSite = VoltarParaSite;
 window.FecharTabela = FecharTabela;
 window.EnviarPedido = EnviarPedido;
 window.formatarPedidoEstilizado = formatarPedidoEstilizado;
-window.testarFormatacao = testarFormatacao;
 window.testarSistemaIVs = testarSistemaIVs;
