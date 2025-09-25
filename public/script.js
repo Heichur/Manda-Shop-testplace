@@ -57,6 +57,7 @@ class PokemonAPIManager {
   }
 
   // Carrega a lista completa de Pokémon da PokeAPI
+  //AAAAAAAAAAAAAAAAAAAAAAAAA
   async loadPokemonList() {
     if (this.isLoaded) return this.pokemonList;
     if (this.isLoading) return this.loadPromise;
