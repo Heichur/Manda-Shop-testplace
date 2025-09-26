@@ -889,223 +889,294 @@ p {
 
 /* ==================== ABILITY SELECT STYLES ==================== */
 
-.ability-select {
-  position: relative;
-  width: 100%;
-  margin-bottom: 15px;
-}
+ .ability-select {
+        position: relative;
+        width: 100%;
+        margin: 8px 0;
+      }
 
-.ability-select-trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 15px;
-  background: white;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 16px;
-  min-height: 48px;
-}
+      .ability-select-trigger {
+        background-color: #1a1a1a;
+        border: 1px solid #444;
+        border-radius: 10px;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: 'Minercraftory';
+        font-size: clamp(14px, 2.5vw, 16px);
+        padding: clamp(8px, 2vw, 12px);
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+        min-height: 48px;
+      }
 
-.ability-select-trigger:hover {
-  border-color: #667eea;
-}
+      .ability-select-trigger:hover,
+      .ability-select-trigger:focus {
+        border-color: yellow;
+        box-shadow: 0 0 5px rgba(255, 255, 0, 0.3);
+        outline: none;
+      }
 
-.ability-select-trigger.active {
-  border-color: #667eea;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
+      .ability-select-trigger.active {
+        border-color: yellow;
+        box-shadow: 0 0 5px rgba(255, 255, 0, 0.3);
+      }
 
-.ability-select-placeholder {
-  flex: 1;
-  color: #666;
-  font-size: 14px;
-}
+      .ability-select-placeholder {
+        color: #888;
+      }
 
-.ability-select-arrow {
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 6px solid #666;
-  transition: transform 0.3s ease;
-}
+      .ability-select-selected {
+        color: white;
+        font-weight: normal;
+      }
 
-.ability-select-trigger.active .ability-select-arrow {
-  transform: rotate(180deg);
-}
+      .ability-select-arrow {
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid #888;
+        transition: transform 0.3s ease;
+        margin-left: 10px;
+      }
 
-.ability-select-options {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 2px solid #667eea;
-  border-top: none;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-  max-height: 300px;
-  overflow-y: auto;
-  z-index: 1000;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  display: none;
-}
+      .ability-select-trigger.active .ability-select-arrow {
+        transform: rotate(180deg);
+      }
 
-.ability-select-options.active {
-  display: block;
-}
+      .ability-select-options {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: #1a1a1a;
+        border: 1px solid #444;
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      }
 
-.ability-options-list {
-  padding: 0;
-}
+      .ability-select-options.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
 
-.ability-header {
-  padding: 10px 15px;
-  background: #f8f9fa;
-  font-weight: bold;
-  font-size: 14px;
-  color: #495057;
-  border-bottom: 1px solid #e9ecef;
-}
+      .ability-search-input {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+        font-family: 'Minercraftory';
+        background-color: #2a2a2a;
+        border: none;
+        border-bottom: 1px solid #444;
+        color: white;
+        box-sizing: border-box;
+        outline: none;
+      }
 
-.ability-header.hidden {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-}
+      .ability-search-input::placeholder {
+        color: #888;
+      }
 
-.ability-option {
-  padding: 12px 15px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border-bottom: 1px solid #f1f3f4;
-  font-size: 14px;
-}
+      .ability-search-input:focus {
+        background-color: #333;
+        border-bottom-color: yellow;
+      }
 
-.ability-option:hover {
-  background: #f8f9fa;
-}
+      .ability-options-list {
+        padding: 0;
+      }
 
-.ability-option.hidden {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-  border-left: 4px solid #667eea;
-}
+      .ability-header {
+        padding: 10px 15px;
+        background-color: #2a2a2a;
+        font-weight: bold;
+        font-size: 14px;
+        color: yellow;
+        border-bottom: 1px solid #444;
+        font-family: 'minecraftia';
+      }
 
-.ability-option.hidden:hover {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
-}
+      .ability-header.hidden {
+        background: linear-gradient(135deg, #c2a10f, #ffcf40);
+        color: black;
+      }
 
-.ability-option.selected {
-  background: #667eea;
-  color: white;
-}
+      .ability-option {
+        padding: 12px 15px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #333;
+        font-size: 14px;
+        font-family: 'minecraftia';
+        color: white;
+      }
 
-.ability-option.selected.hidden {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-}
+      .ability-option:last-child {
+        border-bottom: none;
+      }
 
-.ability-option:last-child {
-  border-bottom: none;
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
-}
+      .ability-option:hover {
+        background-color: #333;
+      }
 
-/* Estilo para quando o sistema está desabilitado */
-.ability-select-trigger:not([data-enabled="true"]) {
-  background: #f5f5f5;
-  color: #999;
-  cursor: not-allowed;
-}
+      .ability-option.hidden {
+        background: linear-gradient(135deg, rgba(194, 161, 15, 0.2), rgba(255, 207, 64, 0.2));
+        border-left: 4px solid #c2a10f;
+      }
 
-.ability-select-trigger:not([data-enabled="true"]):hover {
-  border-color: #ddd;
-}
+      .ability-option.hidden:hover {
+        background: linear-gradient(135deg, rgba(194, 161, 15, 0.3), rgba(255, 207, 64, 0.3));
+      }
 
-/* Responsivo */
-@media (max-width: 768px) {
-  .ability-select-options {
-    max-height: 250px;
-  }
-  
-  .ability-option {
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-  
-  .ability-header {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-}
+      .ability-option.selected {
+        background-color: yellow;
+        color: black;
+        font-weight: bold;
+      }
 
-/* Animações suaves */
-.ability-select-options {
-  animation: slideDown 0.3s ease;
-}
+      .ability-option.selected.hidden {
+        background: linear-gradient(135deg, #c2a10f, #ffcf40);
+        color: black;
+      }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+      .ability-option:last-child {
+        border-bottom: none;
+        border-bottom-left-radius: 6px;
+        border-bottom-right-radius: 6px;
+      }
 
-/* Scroll customizado */
-.ability-options-list::-webkit-scrollbar {
-  width: 6px;
-}
+      /* Estilo para quando o sistema está desabilitado */
+      .ability-select-trigger:not([data-enabled="true"]) {
+        background: #0f0f0f;
+        color: #555;
+        cursor: not-allowed;
+      }
 
-.ability-options-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
+      .ability-select-trigger:not([data-enabled="true"]):hover {
+        border-color: #444;
+      }
 
-.ability-options-list::-webkit-scrollbar-thumb {
-  background:#292a31;
-  border-radius: 3px;
-}
+      /* Responsivo para habilidades */
+      @media (max-width: 768px) {
+        .ability-select-trigger {
+          padding: 15px;
+          font-size: 16px;
+          min-height: 54px;
+        }
+        
+        .ability-search-input {
+          padding: 15px;
+          font-size: 16px;
+        }
+        
+        .ability-select-options {
+          max-height: 250px;
+        }
+        
+        .ability-option {
+          padding: 15px 12px;
+          font-size: 14px;
+        }
+        
+        .ability-header {
+          padding: 12px 15px;
+          font-size: 13px;
+        }
+      }
 
-.ability-options-list::-webkit-scrollbar-thumb:hover {
-  background: #292a31;
-}
+      /* Animações suaves */
+      .ability-select-options {
+        animation: slideDown 0.3s ease;
+      }
 
-/* Estados especiais */
-.ability-loading {
-  padding: 20px;
-  text-align: center;
-  color: #666;
-  font-style: italic;
-}
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-.ability-error {
-  padding: 15px;
-  text-align: center;
-  color: #dc3545;
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
-  margin: 5px;
-}
+      /* Scroll customizado para habilidades */
+      .ability-options-list::-webkit-scrollbar {
+        width: 6px;
+      }
 
-/* Integração com o resto do formulário */
-#Comprando .ability-select {
-  margin: 10px 0;
-}
+      .ability-options-list::-webkit-scrollbar-track {
+        background: #1a1a1a;
+      }
 
-/* Melhorias de acessibilidade */
-.ability-select-trigger:focus {
-  outline: 2px solid #292a31;
-  outline-offset: 2px;
-}
+      .ability-options-list::-webkit-scrollbar-thumb {
+        background: #444;
+        border-radius: 3px;
+      }
 
-.ability-option:focus {
-  background: #292a31;
-  color: white;
-  outline: none;
-}
+      .ability-options-list::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+
+      /* Estados especiais */
+      .ability-loading {
+        padding: 20px;
+        text-align: center;
+        color: #888;
+        font-style: italic;
+        font-family: 'minecraftia';
+      }
+
+      .ability-error {
+        padding: 15px;
+        text-align: center;
+        color: #ff4444;
+        background: #2a1a1a;
+        border: 1px solid #444;
+        border-radius: 4px;
+        margin: 5px;
+        font-family: 'minecraftia';
+      }
+
+      /* Integração com o resto do formulário */
+      #Comprando .ability-select {
+        margin: 8px 0;
+      }
+
+      /* Melhorias de acessibilidade */
+      .ability-select-trigger:focus {
+        outline: 2px solid yellow;
+        outline-offset: 2px;
+      }
+
+      .ability-option:focus {
+        background: #333;
+        color: white;
+        outline: none;
+      }
+
+      /* Estilo para o checkbox HA */
+      #HiddenHabilidade {
+        margin: 0 8px 0 0;
+        transform: scale(1.2);
+      }
+
+      .ha-label {
+        display: inline-flex;
+        align-items: center;
+        margin: 10px 0;
+        font-size: 14px;
+        color: #495057;
+      }
