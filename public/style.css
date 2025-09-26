@@ -886,3 +886,226 @@ p {
     font-size: 14px;
   }
 }
+
+/* ==================== ABILITY SELECT STYLES ==================== */
+
+.ability-select {
+  position: relative;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.ability-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  min-height: 48px;
+}
+
+.ability-select-trigger:hover {
+  border-color: #667eea;
+}
+
+.ability-select-trigger.active {
+  border-color: #667eea;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.ability-select-placeholder {
+  flex: 1;
+  color: #666;
+  font-size: 14px;
+}
+
+.ability-select-arrow {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #666;
+  transition: transform 0.3s ease;
+}
+
+.ability-select-trigger.active .ability-select-arrow {
+  transform: rotate(180deg);
+}
+
+.ability-select-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #667eea;
+  border-top: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+
+.ability-select-options.active {
+  display: block;
+}
+
+.ability-options-list {
+  padding: 0;
+}
+
+.ability-header {
+  padding: 10px 15px;
+  background: #f8f9fa;
+  font-weight: bold;
+  font-size: 14px;
+  color: #495057;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.ability-header.hidden {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.ability-option {
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f1f3f4;
+  font-size: 14px;
+}
+
+.ability-option:hover {
+  background: #f8f9fa;
+}
+
+.ability-option.hidden {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border-left: 4px solid #667eea;
+}
+
+.ability-option.hidden:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+}
+
+.ability-option.selected {
+  background: #667eea;
+  color: white;
+}
+
+.ability-option.selected.hidden {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.ability-option:last-child {
+  border-bottom: none;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+/* Estilo para quando o sistema está desabilitado */
+.ability-select-trigger:not([data-enabled="true"]) {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.ability-select-trigger:not([data-enabled="true"]):hover {
+  border-color: #ddd;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .ability-select-options {
+    max-height: 250px;
+  }
+  
+  .ability-option {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .ability-header {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+/* Animações suaves */
+.ability-select-options {
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scroll customizado */
+.ability-options-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ability-options-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.ability-options-list::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 3px;
+}
+
+.ability-options-list::-webkit-scrollbar-thumb:hover {
+  background: #5a67d8;
+}
+
+/* Estados especiais */
+.ability-loading {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+.ability-error {
+  padding: 15px;
+  text-align: center;
+  color: #dc3545;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  margin: 5px;
+}
+
+/* Integração com o resto do formulário */
+#Comprando .ability-select {
+  margin: 10px 0;
+}
+
+/* Melhorias de acessibilidade */
+.ability-select-trigger:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.ability-option:focus {
+  background: #667eea;
+  color: white;
+  outline: none;
+}

@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <link rel="stylesheet" href="style.css">
   </head>
+</head>
   <body>
    
     <div id="Opções">
@@ -76,10 +77,17 @@ autocomplete="off"
 </div>
 </div>
 <input type="hidden" id="NomeDosPoke">
+
 <input type="search" id="EggMoves" placeholder="Egg move do pokemon escolhido">
 <input type="search" id="Nature" placeholder="Nature do pokemon">
-<input type="search" id="Habilidade" placeholder="Habilidade do Pokemon">
-<input type="checkbox" id="HiddenHabilidade"><p>Ha?</p>
+
+<input type="search" id="Habilidade" placeholder="Selecione um Pokémon primeiro..." style="display: none;">
+
+<div class="ha-label">
+  <input type="checkbox" id="HiddenHabilidade">
+  <span>Hidden Ability?</span>
+</div>
+
 <input type="text" id="GeneroDoPoke" placeholder="Macho ou Femea / Não é obrigatório">
 <input type="text" id="Ivs" placeholder="Ivs desejados">
 <input type="text" id="CastradoOuBreedavel" placeholder="Castrado ou Breedavel?">
@@ -99,6 +107,6 @@ autocomplete="off"
 <button onclick="FecharTopCompradores()">Voltar</button>
 </section>
 </div>
+</body>
 </html>
-<script src="listapokes.js"></script>
 <script type="module" src="script.js"></script>
