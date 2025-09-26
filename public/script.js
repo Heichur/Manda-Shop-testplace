@@ -54,10 +54,63 @@ class PokemonAPIManager {
       // Gen 9 - Lendários e Míticos
       1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025 // Koraidon, Miraidon, Walking Wake, Iron Leaves, Okidogi, Munkidori, Fezandipiti, Ogerpon, Archaludon, Hydrapple, Gouging Fire, Raging Bolt, Iron Boulder, Iron Crown, Terapagos, Pecharunt
     ]);
+
+    // Formas especiais para filtrar (Megas, Gigantamax, Terastal, etc)
+    this.formasEspeciaisExcluir = [
+      // Mega evolutions
+      'mega', 'mega-x', 'mega-y',
+      
+      // Gigantamax
+      'gmax',
+      
+      // Primal forms
+      'primal',
+      
+      // Ultra forms
+      'ultra',
+      
+      // Eternamax
+      'eternamax',
+      
+      // Shadow/Purified (Pokemon GO)
+      'shadow', 'purified',
+      
+      // Totem forms
+      'totem',
+      
+      // Other special battle forms
+      'zen-mode', 'attack-forme', 'defense-forme', 'speed-forme',
+      'blade-forme', 'shield-forme',
+      'origin-forme', 'sky-forme',
+      'heat-rotom', 'wash-rotom', 'frost-rotom', 'fan-rotom', 'mow-rotom',
+      
+      // Terastal (if they exist in API)
+      'tera', 'terastal',
+      
+      // Dynamax (regular dynamax, not gigantamax)
+      'dynamax'
+    ];
+
+    // Formas regionais para MANTER
+    this.formasRegionaisPermitidas = [
+      'alola', 'galar', 'hisui', 'paldea'
+    ];
+  }
+
+  // Função para verificar se uma forma deve ser excluída
+  _deveExcluirForma(nomeOriginal) {
+    const nome = nomeOriginal.toLowerCase();
+    
+    // Se é uma forma regional permitida, manter
+    if (this.formasRegionaisPermitidas.some(regiao => nome.includes(regiao))) {
+      return false;
+    }
+    
+    // Se contém qualquer forma especial para excluir, remover
+    return this.formasEspeciaisExcluir.some(forma => nome.includes(forma));
   }
 
   // Carrega a lista completa de Pokémon da PokeAPI
-  //AAAAAAAAAAAAAAAAAAAAAAAAA
   async loadPokemonList() {
     if (this.isLoaded) return this.pokemonList;
     if (this.isLoading) return this.loadPromise;
@@ -84,7 +137,7 @@ class PokemonAPIManager {
       
       const data = await response.json();
       
-      // Filtrar Pokémon removendo lendários e míticos
+      // Filtrar Pokémon removendo lendários, míticos e formas especiais
       this.pokemonList = data.results
         .map(pokemon => {
           const id = this._extractIdFromUrl(pokemon.url);
@@ -103,8 +156,17 @@ class PokemonAPIManager {
           };
         })
         .filter(pokemon => {
-          // ★ AQUI REMOVE TODOS OS LENDÁRIOS E MÍTICOS ★
-          return !this.legendaryIds.has(pokemon.id);
+          // ★ FILTRO 1: Remove lendários e míticos ★
+          if (this.legendaryIds.has(pokemon.id)) {
+            return false;
+          }
+          
+          // ★ FILTRO 2: Remove formas especiais (Megas, Gigantamax, etc) ★
+          if (this._deveExcluirForma(pokemon.originalName)) {
+            return false;
+          }
+          
+          return true;
         });
       
       // Ordenar por ID para manter ordem das gerações
@@ -113,13 +175,13 @@ class PokemonAPIManager {
       this.isLoaded = true;
       this.isLoading = false;
       
-      console.log(`✅ ${this.pokemonList.length} Pokémon carregados com sucesso! (Lendários removidos)`);
+      console.log(`✅ ${this.pokemonList.length} Pokémon carregados com sucesso! (Lendários e formas especiais removidos)`);
       
     } catch (error) {
       console.error('❌ Erro ao carregar PokeAPI:', error);
       this.isLoading = false;
       
-      // Fallback para lista básica (também sem lendários)
+      // Fallback para lista básica (também sem lendários e formas especiais)
       this.pokemonList = this._getFallbackList();
       this.isLoaded = true;
       
@@ -140,9 +202,7 @@ class PokemonAPIManager {
       { id: 25, name: 'Pikachu', originalName: 'pikachu' },
       { id: 39, name: 'Jigglypuff', originalName: 'jigglypuff' },
       { id: 94, name: 'Gengar', originalName: 'gengar' },
-      { id: 143, name: 'Snorlax', originalName: 'snorlax' },
-      { id: 150, name: 'Mewtwo', originalName: 'mewtwo' },
-      { id: 151, name: 'Mew', originalName: 'mew' }
+      { id: 143, name: 'Snorlax', originalName: 'snorlax' }
     ];
   }
 
@@ -225,7 +285,7 @@ class PokemonAPIManager {
       .replace(/[^a-z0-9]/g, '');
   }
 
-  // Retorna todos os Pokémon (já filtrados sem lendários)
+  // Retorna todos os Pokémon (já filtrados sem lendários e formas especiais)
   getAllPokemon() {
     return this.pokemonList;
   }
