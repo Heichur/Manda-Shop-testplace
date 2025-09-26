@@ -52,62 +52,26 @@ class PokemonAPIManager {
       888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 898, // Zacian, Zamazenta, Eternatus, Kubfu, Urshifu, Regieleki, Regidrago, Glastrier, Spectrier, Calyrex, Zarude
       
       // Gen 9 - Lendários e Míticos
-      1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 10264, 10265, 10266, 10267, 10268, 10269, 10270, 10271  // Koraidon, Miraidon, Walking Wake, Iron Leaves, Okidogi, Munkidori, Fezandipiti, Ogerpon, Archaludon, Hydrapple, Gouging Fire, Raging Bolt, Iron Boulder, Iron Crown, Terapagos, Pecharunt
+      1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025 // Koraidon, Miraidon, Walking Wake, Iron Leaves, Okidogi, Munkidori, Fezandipiti, Ogerpon, Archaludon, Hydrapple, Gouging Fire, Raging Bolt, Iron Boulder, Iron Crown, Terapagos, Pecharunt
     ]);
 
-    // Formas especiais para filtrar (Megas, Gigantamax, Terastal, etc)
-    this.formasEspeciaisExcluir = [
-      // Mega evolutions
-      'mega', 'mega-x', 'mega-y',
-      
-      // Gigantamax
-      'gmax',
-      
-      // Primal forms
-      'primal',
-      
-      // Ultra forms
-      'ultra',
-      
-      // Eternamax
-      'eternamax',
-      
-      // Shadow/Purified (Pokemon GO)
-      'shadow', 'purified',
-      
-      // Totem forms
-      'totem',
-      
-      // Other special battle forms
-      'zen-mode', 'attack-forme', 'defense-forme', 'speed-forme',
-      'blade-forme', 'shield-forme',
-      'origin-forme', 'sky-forme',
-      'heat-rotom', 'wash-rotom', 'frost-rotom', 'fan-rotom', 'mow-rotom',
-      
-      // Terastal (if they exist in API)
-      'tera', 'terastal',
-      
-      // Dynamax (regular dynamax, not gigantamax)
-      'dynamax'
+    // Palavras-chave para identificar formas especiais que devem ser removidas
+    this.specialFormsKeywords = [
+      'mega', 'gigantamax', 'gmax', 'primal', 'ultra', 'eternamax', 
+      'crowned', 'origin', 'sky', 'hangry', 'zen', 'therian', 
+      'black', 'white', 'complete', 'unbound', 'resolute', 'pirouette',
+      'blade', 'shield', 'dusk', 'dawn', 'ice', 'shadow', 'rider',
+      'low-key', 'amped', 'full-belly', 'ruby', 'sapphire', 'emerald',
+      'sunshine', 'east', 'west', 'autumn', 'summer', 'spring', 'winter',
+      'red-striped', 'blue-striped', 'incarnate', 'school', 'solo',
+      'midday', 'midnight', 'dusk', 'ultra', 'dawn-wings', 'dusk-mane',
+      'stellar', 'wellspring', 'hearthflame', 'cornerstone', 'teal'
     ];
 
-    // Formas regionais para MANTER
-    this.formasRegionaisPermitidas = [
+    // Formas regionais permitidas
+    this.allowedRegionalForms = [
       'alola', 'galar', 'hisui', 'paldea'
     ];
-  }
-
-  // Função para verificar se uma forma deve ser excluída
-  _deveExcluirForma(nomeOriginal) {
-    const nome = nomeOriginal.toLowerCase();
-    
-    // Se é uma forma regional permitida, manter
-    if (this.formasRegionaisPermitidas.some(regiao => nome.includes(regiao))) {
-      return false;
-    }
-    
-    // Se contém qualquer forma especial para excluir, remover
-    return this.formasEspeciaisExcluir.some(forma => nome.includes(forma));
   }
 
   // Carrega a lista completa de Pokémon da PokeAPI
@@ -156,15 +120,11 @@ class PokemonAPIManager {
           };
         })
         .filter(pokemon => {
-          // ★ FILTRO 1: Remove lendários e míticos ★
-          if (this.legendaryIds.has(pokemon.id)) {
-            return false;
-          }
+          // ★ REMOVE LENDÁRIOS E MÍTICOS ★
+          if (this.legendaryIds.has(pokemon.id)) return false;
           
-          // ★ FILTRO 2: Remove formas especiais (Megas, Gigantamax, etc) ★
-          if (this._deveExcluirForma(pokemon.originalName)) {
-            return false;
-          }
+          // ★ REMOVE FORMAS ESPECIAIS (exceto regionais) ★
+          if (this.isSpecialForm(pokemon.originalName)) return false;
           
           return true;
         });
@@ -175,13 +135,13 @@ class PokemonAPIManager {
       this.isLoaded = true;
       this.isLoading = false;
       
-      console.log(`✅ ${this.pokemonList.length} Pokémon carregados com sucesso! (Lendários e formas especiais removidos)`);
+      console.log(`✅ ${this.pokemonList.length} Pokémon carregados com sucesso! (Lendários removidos)`);
       
     } catch (error) {
       console.error('❌ Erro ao carregar PokeAPI:', error);
       this.isLoading = false;
       
-      // Fallback para lista básica (também sem lendários e formas especiais)
+      // Fallback para lista básica (também sem lendários)
       this.pokemonList = this._getFallbackList();
       this.isLoaded = true;
       
@@ -202,7 +162,9 @@ class PokemonAPIManager {
       { id: 25, name: 'Pikachu', originalName: 'pikachu' },
       { id: 39, name: 'Jigglypuff', originalName: 'jigglypuff' },
       { id: 94, name: 'Gengar', originalName: 'gengar' },
-      { id: 143, name: 'Snorlax', originalName: 'snorlax' }
+      { id: 143, name: 'Snorlax', originalName: 'snorlax' },
+      { id: 150, name: 'Mewtwo', originalName: 'mewtwo' },
+      { id: 151, name: 'Mew', originalName: 'mew' }
     ];
   }
 
@@ -285,7 +247,7 @@ class PokemonAPIManager {
       .replace(/[^a-z0-9]/g, '');
   }
 
-  // Retorna todos os Pokémon (já filtrados sem lendários e formas especiais)
+  // Retorna todos os Pokémon (já filtrados sem lendários)
   getAllPokemon() {
     return this.pokemonList;
   }
@@ -293,6 +255,35 @@ class PokemonAPIManager {
   // Verifica se um Pokémon é lendário pelo ID
   isLegendary(pokemonId) {
     return this.legendaryIds.has(pokemonId);
+  }
+
+  // Verifica se um Pokémon é lendário pelo nome
+  isPokemonLegendary(pokemonName) {
+    const pokemon = this.findExactPokemon(pokemonName);
+    return pokemon ? this.isLegendary(pokemon.id) : false;
+  }
+
+  // Verifica se um Pokémon tem forma especial que deve ser removida
+  isSpecialForm(pokemonName) {
+    const nameLower = pokemonName.toLowerCase();
+    
+    // Verificar se tem formas especiais proibidas
+    const hasSpecialForm = this.specialFormsKeywords.some(keyword => 
+      nameLower.includes(keyword)
+    );
+    
+    if (!hasSpecialForm) return false;
+    
+    // Verificar se é uma forma regional permitida
+    const isAllowedRegional = this.allowedRegionalForms.some(regional => 
+      nameLower.includes(regional)
+    );
+    
+    // Se tem forma especial MAS é regional permitida, não remover
+    if (isAllowedRegional) return false;
+    
+    // Se tem forma especial e NÃO é regional permitida, remover
+    return true;
   }
 
   // Verifica se um Pokémon é lendário pelo nome
@@ -327,7 +318,218 @@ class PokemonAPIManager {
 // Instância global do gerenciador de Pokémon
 window.pokemonAPI = new PokemonAPIManager();
 
-// ==================== POKEMON SELECT COMPONENT (ATUALIZADO) ====================
+// ==================== ABILITY SELECT COMPONENT ====================
+
+class AbilitySelect {
+  constructor(element, hiddenCheckbox) {
+    this.element = element;
+    this.hiddenCheckbox = hiddenCheckbox;
+    this.currentPokemon = null;
+    this.abilities = [];
+    this.hiddenAbility = null;
+    
+    this.init();
+  }
+  
+  init() {
+    // Converter input normal em select customizado
+    this.createCustomSelect();
+  }
+  
+  createCustomSelect() {
+    // Limpar o input atual e criar estrutura de select
+    this.element.style.display = 'none';
+    
+    const selectContainer = document.createElement('div');
+    selectContainer.className = 'ability-select';
+    selectContainer.id = 'abilitySelectContainer';
+    
+    selectContainer.innerHTML = `
+      <div class="ability-select-trigger" tabindex="0">
+        <span class="ability-select-placeholder">Selecione um Pokémon primeiro</span>
+        <div class="ability-select-arrow"></div>
+      </div>
+      <div class="ability-select-options">
+        <div class="ability-options-list"></div>
+      </div>
+    `;
+    
+    this.element.parentNode.insertBefore(selectContainer, this.element.nextSibling);
+    
+    this.trigger = selectContainer.querySelector('.ability-select-trigger');
+    this.optionsContainer = selectContainer.querySelector('.ability-select-options');
+    this.optionsList = selectContainer.querySelector('.ability-options-list');
+    this.placeholderElement = selectContainer.querySelector('.ability-select-placeholder');
+    
+    this.bindEvents();
+  }
+  
+  bindEvents() {
+    this.trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (this.currentPokemon) {
+        this.toggle();
+      }
+    });
+    
+    document.addEventListener('click', (e) => {
+      if (!this.element.parentNode.contains(e.target)) {
+        this.close();
+      }
+    });
+  }
+  
+  toggle() {
+    if (this.optionsContainer.classList.contains('active')) {
+      this.close();
+    } else {
+      this.open();
+    }
+  }
+  
+  open() {
+    this.trigger.classList.add('active');
+    this.optionsContainer.classList.add('active');
+  }
+  
+  close() {
+    this.trigger.classList.remove('active');
+    this.optionsContainer.classList.remove('active');
+  }
+  
+  async loadAbilities(pokemonName) {
+    try {
+      this.placeholderElement.textContent = 'Carregando habilidades...';
+      this.currentPokemon = pokemonName;
+      
+      const pokemonDetails = await window.pokemonAPI.getPokemonDetails(pokemonName.toLowerCase());
+      
+      if (!pokemonDetails || !pokemonDetails.abilities) {
+        this.showError('Erro ao carregar habilidades');
+        return;
+      }
+      
+      // Separar habilidades normais e hidden
+      this.abilities = pokemonDetails.abilities.filter(ability => !ability.isHidden);
+      this.hiddenAbility = pokemonDetails.abilities.find(ability => ability.isHidden);
+      
+      this.createAbilityOptions();
+      this.updatePlaceholder();
+      
+    } catch (error) {
+      console.error('Erro ao carregar habilidades:', error);
+      this.showError('Erro ao carregar habilidades');
+    }
+  }
+  
+  createAbilityOptions() {
+    this.optionsList.innerHTML = '';
+    
+    // Habilidades normais
+    if (this.abilities.length > 0) {
+      const normalHeader = document.createElement('div');
+      normalHeader.className = 'ability-header';
+      normalHeader.textContent = '🔸 Habilidades Normais';
+      this.optionsList.appendChild(normalHeader);
+      
+      this.abilities.forEach(ability => {
+        const option = document.createElement('div');
+        option.className = 'ability-option';
+        option.textContent = this.formatAbilityName(ability.name);
+        option.dataset.ability = ability.name;
+        option.dataset.isHidden = 'false';
+        
+        option.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.selectAbility(ability.name, false);
+        });
+        
+        this.optionsList.appendChild(option);
+      });
+    }
+    
+    // Habilidade oculta
+    if (this.hiddenAbility) {
+      const hiddenHeader = document.createElement('div');
+      hiddenHeader.className = 'ability-header hidden';
+      hiddenHeader.textContent = '✨ Habilidade Oculta (Hidden Ability)';
+      this.optionsList.appendChild(hiddenHeader);
+      
+      const option = document.createElement('div');
+      option.className = 'ability-option hidden';
+      option.textContent = this.formatAbilityName(this.hiddenAbility.name);
+      option.dataset.ability = this.hiddenAbility.name;
+      option.dataset.isHidden = 'true';
+      
+      option.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.selectAbility(this.hiddenAbility.name, true);
+      });
+      
+      this.optionsList.appendChild(option);
+    }
+  }
+  
+  formatAbilityName(abilityName) {
+    return abilityName
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+  
+  selectAbility(abilityName, isHidden) {
+    const formattedName = this.formatAbilityName(abilityName);
+    
+    // Atualizar o input original
+    this.element.value = formattedName;
+    
+    // Atualizar o checkbox de Hidden Ability
+    this.hiddenCheckbox.checked = isHidden;
+    
+    // Atualizar placeholder
+    this.placeholderElement.textContent = formattedName + (isHidden ? ' (Hidden)' : '');
+    
+    // Marcar opção selecionada
+    this.optionsList.querySelectorAll('.ability-option').forEach(opt => {
+      opt.classList.remove('selected');
+    });
+    
+    const selectedOption = this.optionsList.querySelector(`[data-ability="${abilityName}"]`);
+    if (selectedOption) {
+      selectedOption.classList.add('selected');
+    }
+    
+    this.close();
+  }
+  
+  updatePlaceholder() {
+    if (this.abilities.length === 0 && !this.hiddenAbility) {
+      this.placeholderElement.textContent = 'Nenhuma habilidade encontrada';
+    } else {
+      this.placeholderElement.textContent = 'Selecione uma habilidade...';
+    }
+  }
+  
+  showError(message) {
+    this.placeholderElement.textContent = message;
+    this.abilities = [];
+    this.hiddenAbility = null;
+  }
+  
+  reset() {
+    this.currentPokemon = null;
+    this.abilities = [];
+    this.hiddenAbility = null;
+    this.element.value = '';
+    this.hiddenCheckbox.checked = false;
+    this.placeholderElement.textContent = 'Selecione um Pokémon primeiro';
+    this.optionsList.innerHTML = '';
+    this.close();
+  }
+}
 
 class PokemonSelect {
   constructor(element) {
@@ -511,6 +713,11 @@ class PokemonSelect {
     this.element.dispatchEvent(new CustomEvent('pokemonSelected', {
       detail: { pokemon: pokemon }
     }));
+    
+    // Carregar habilidades automaticamente
+    if (window.abilitySelectInstance) {
+      window.abilitySelectInstance.loadAbilities(pokemon.originalName);
+    }
   }
   
   filterOptions(searchTerm) {
@@ -1099,6 +1306,9 @@ function desbloquearBotoes() {
 
 function inicializarPokemonSelect() {
   const pokemonSelectElement = document.getElementById('pokemonSelect');
+  const habilidadeInput = document.getElementById('Habilidade');
+  const hiddenCheckbox = document.getElementById('HiddenHabilidade');
+  
   if (pokemonSelectElement) {
     if (window.pokemonSelectInstance) {
       window.pokemonSelectInstance.destroy();
@@ -1113,6 +1323,17 @@ function inicializarPokemonSelect() {
         console.log('✅ Pokémon selecionado:', e.detail.pokemon);
       });
     }
+  }
+  
+  // Inicializar sistema de habilidades
+  if (habilidadeInput && hiddenCheckbox) {
+    if (window.abilitySelectInstance) {
+      // Limpar instância anterior se existir
+      const oldContainer = document.getElementById('abilitySelectContainer');
+      if (oldContainer) oldContainer.remove();
+    }
+    
+    window.abilitySelectInstance = new AbilitySelect(habilidadeInput, hiddenCheckbox);
   }
 }
 
@@ -1280,6 +1501,12 @@ function VoltarParaSite() {
     window.pokemonSelectInstance = null;
   }
   
+  if (window.abilitySelectInstance) {
+    const abilityContainer = document.getElementById('abilitySelectContainer');
+    if (abilityContainer) abilityContainer.remove();
+    window.abilitySelectInstance = null;
+  }
+  
   document.getElementById("Comprando").style.display = "none";
   document.getElementById("Site_Container").style.display = "flex";
   Fechado();
@@ -1416,6 +1643,11 @@ async function EnviarPedido() {
     if (window.pokemonSelectInstance) {
       window.pokemonSelectInstance.reset();
     }
+    
+    if (window.abilitySelectInstance) {
+      window.abilitySelectInstance.reset();
+    }
+    
     const nomeInput = document.getElementById("NomeDosPoke");
     if (nomeInput) nomeInput.value = "";
     

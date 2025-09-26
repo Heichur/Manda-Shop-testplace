@@ -81,13 +81,22 @@ autocomplete="off"
 <input type="search" id="EggMoves" placeholder="Egg move do pokemon escolhido">
 <input type="search" id="Nature" placeholder="Nature do pokemon">
 
-<input type="search" id="Habilidade" placeholder="Selecione um Pokémon primeiro..." style="display: none;">
-
-<div class="ha-label">
-  <input type="checkbox" id="HiddenHabilidade">
-  <span>Hidden Ability?</span>
+<div class="pokemon-select" id="abilitySelect">
+  <div class="pokemon-select-trigger" tabindex="0">
+    <span class="pokemon-select-placeholder">Selecione um Pokémon primeiro...</span>
+    <div class="pokemon-select-arrow"></div>
+  </div>
+  <div class="pokemon-select-options">
+    <input
+      type="text"
+      class="pokemon-search-input"
+      placeholder="Buscar Habilidade..."
+      autocomplete="off"
+    >
+    <div class="pokemon-options-list"></div>
+  </div>
 </div>
-
+<input type="hidden" id="Habilidade">
 <input type="text" id="GeneroDoPoke" placeholder="Macho ou Femea / Não é obrigatório">
 <input type="text" id="Ivs" placeholder="Ivs desejados">
 <input type="text" id="CastradoOuBreedavel" placeholder="Castrado ou Breedavel?">
