@@ -321,9 +321,19 @@ window.pokemonAPI = new PokemonAPIManager();
 // ==================== ABILITY SELECT COMPONENT ====================
 
 class AbilitySelect {
-  constructor(element, hiddenCheckbox) {
+  constructor(element) {
     this.element = element;
-    this.hiddenCheckbox = hiddenCheckbox;
+    this.trigger = element.querySelector('.pokemon-select-trigger');
+    this.optionsContainer = element.querySelector('.pokemon-select-options');
+    this.searchInput = element.querySelector('.pokemon-search-input');
+    this.optionsList = element.querySelector('.pokemon-options-list');
+    this.placeholderElement = element.querySelector('.pokemon-select-placeholder');
+    
+    this.selectedValue = '';
+    this.selectedAbility = null;
+    this.isOpen = false;
+    this.boundDocumentClickHandler = null;
+    this.currentOptions = [];
     this.currentPokemon = null;
     this.abilities = [];
     this.hiddenAbility = null;
@@ -332,38 +342,9 @@ class AbilitySelect {
   }
   
   init() {
-    // Converter input normal em select customizado
-    this.createCustomSelect();
-  }
-  
-  createCustomSelect() {
-    // Limpar o input atual e criar estrutura de select
-    this.element.style.display = 'none';
-    
-    const selectContainer = document.createElement('div');
-    selectContainer.className = 'ability-select';
-    selectContainer.id = 'abilitySelectContainer';
-    
-    selectContainer.innerHTML = `
-      <div class="ability-select-trigger" tabindex="0">
-        <span class="ability-select-placeholder">Selecione um Pokémon primeiro</span>
-        <div class="ability-select-arrow"></div>
-      </div>
-      <div class="ability-select-options">
-        <div class="ability-options-list"></div>
-      </div>
-    `;
-    
-    this.element.parentNode.insertBefore(selectContainer, this.element.nextSibling);
-    
-    this.trigger = selectContainer.querySelector('.ability-select-trigger');
-    this.optionsContainer = selectContainer.querySelector('.ability-select-options');
-    this.optionsList = selectContainer.querySelector('.ability-options-list');
-    this.placeholderElement = selectContainer.querySelector('.ability-select-placeholder');
-    
     this.bindEvents();
   }
-  
+
   bindEvents() {
     this.trigger.addEventListener('click', (e) => {
       e.preventDefault();
@@ -373,15 +354,48 @@ class AbilitySelect {
       }
     });
     
-    document.addEventListener('click', (e) => {
-      if (!this.element.parentNode.contains(e.target)) {
+    this.trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (this.currentPokemon) {
+          this.toggle();
+        }
+      } else if (e.key === 'Escape') {
         this.close();
       }
     });
+    
+    this.searchInput.addEventListener('input', (e) => {
+      this.filterOptions(e.target.value);
+    });
+   
+    this.searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        this.close();
+      }
+      e.stopPropagation();
+    });
+   
+    this.searchInput.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    this.optionsContainer.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    
+    // Event listener para clicks fora do componente
+    this.boundDocumentClickHandler = (e) => {
+      if (!this.element.contains(e.target)) {
+        this.close();
+      }
+    };
   }
   
   toggle() {
-    if (this.optionsContainer.classList.contains('active')) {
+    if (this.isOpen) {
       this.close();
     } else {
       this.open();
@@ -389,13 +403,35 @@ class AbilitySelect {
   }
   
   open() {
+    if (this.isOpen || !this.currentPokemon) return;
+    
+    this.isOpen = true;
     this.trigger.classList.add('active');
     this.optionsContainer.classList.add('active');
+    
+    setTimeout(() => {
+      document.addEventListener('click', this.boundDocumentClickHandler, true);
+      this.searchInput.focus();
+    }, 50);
+    
+    this.searchInput.value = '';
+    this.filterOptions('');
   }
   
   close() {
+    if (!this.isOpen) return;
+    
+    this.isOpen = false;
     this.trigger.classList.remove('active');
     this.optionsContainer.classList.remove('active');
+    
+    if (this.boundDocumentClickHandler) {
+      document.removeEventListener('click', this.boundDocumentClickHandler, true);
+    }
+    
+    if (document.activeElement === this.searchInput) {
+      this.trigger.focus();
+    }
   }
   
   async loadAbilities(pokemonName) {
@@ -425,6 +461,7 @@ class AbilitySelect {
   
   createAbilityOptions() {
     this.optionsList.innerHTML = '';
+    this.currentOptions = [];
     
     // Habilidades normais
     if (this.abilities.length > 0) {
@@ -434,16 +471,24 @@ class AbilitySelect {
       this.optionsList.appendChild(normalHeader);
       
       this.abilities.forEach(ability => {
+        const abilityData = {
+          name: ability.name,
+          displayName: this.formatAbilityName(ability.name),
+          isHidden: false
+        };
+        
+        this.currentOptions.push(abilityData);
+        
         const option = document.createElement('div');
-        option.className = 'ability-option';
-        option.textContent = this.formatAbilityName(ability.name);
+        option.className = 'pokemon-option'; // Usando a mesma classe do pokemon-select
+        option.textContent = abilityData.displayName;
         option.dataset.ability = ability.name;
         option.dataset.isHidden = 'false';
         
         option.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          this.selectAbility(ability.name, false);
+          this.selectAbility(abilityData);
         });
         
         this.optionsList.appendChild(option);
@@ -457,20 +502,56 @@ class AbilitySelect {
       hiddenHeader.textContent = '✨ Habilidade Oculta (Hidden Ability)';
       this.optionsList.appendChild(hiddenHeader);
       
+      const abilityData = {
+        name: this.hiddenAbility.name,
+        displayName: this.formatAbilityName(this.hiddenAbility.name),
+        isHidden: true
+      };
+      
+      this.currentOptions.push(abilityData);
+      
       const option = document.createElement('div');
-      option.className = 'ability-option hidden';
-      option.textContent = this.formatAbilityName(this.hiddenAbility.name);
+      option.className = 'pokemon-option hidden'; // Usando a mesma classe do pokemon-select
+      option.textContent = abilityData.displayName;
       option.dataset.ability = this.hiddenAbility.name;
       option.dataset.isHidden = 'true';
       
       option.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        this.selectAbility(this.hiddenAbility.name, true);
+        this.selectAbility(abilityData);
       });
       
       this.optionsList.appendChild(option);
     }
+  }
+  
+  filterOptions(searchTerm) {
+    const searchLower = searchTerm.toLowerCase().trim();
+    
+    this.optionsList.querySelectorAll('.pokemon-option').forEach(option => {
+      const abilityName = option.textContent.toLowerCase();
+      if (!searchTerm || abilityName.includes(searchLower)) {
+        option.style.display = 'block';
+      } else {
+        option.style.display = 'none';
+      }
+    });
+    
+    // Mostrar/ocultar headers baseado nas opções visíveis
+    const headers = this.optionsList.querySelectorAll('.ability-header');
+    headers.forEach(header => {
+      const isHiddenHeader = header.classList.contains('hidden');
+      const relatedOptions = this.optionsList.querySelectorAll(
+        isHiddenHeader ? '.pokemon-option.hidden' : '.pokemon-option:not(.hidden)'
+      );
+      
+      const hasVisibleOptions = Array.from(relatedOptions).some(opt => 
+        opt.style.display !== 'none'
+      );
+      
+      header.style.display = hasVisibleOptions ? 'block' : 'none';
+    });
   }
   
   formatAbilityName(abilityName) {
@@ -480,24 +561,33 @@ class AbilitySelect {
       .join(' ');
   }
   
-  selectAbility(abilityName, isHidden) {
-    const formattedName = this.formatAbilityName(abilityName);
+  selectAbility(abilityData) {
+    this.selectedValue = abilityData.displayName;
+    this.selectedAbility = abilityData;
     
-    // Atualizar o input original
-    this.element.value = formattedName;
+    // Atualizar o input oculto
+    const hiddenInput = document.getElementById('Habilidade');
+    if (hiddenInput) {
+      hiddenInput.value = abilityData.displayName;
+    }
     
     // Atualizar o checkbox de Hidden Ability
-    this.hiddenCheckbox.checked = isHidden;
+    const hiddenCheckbox = document.getElementById('HiddenHabilidade');
+    if (hiddenCheckbox) {
+      hiddenCheckbox.checked = abilityData.isHidden;
+    }
     
     // Atualizar placeholder
-    this.placeholderElement.textContent = formattedName + (isHidden ? ' (Hidden)' : '');
+    this.placeholderElement.textContent = abilityData.displayName + (abilityData.isHidden ? ' (Hidden)' : '');
+    this.placeholderElement.classList.remove('pokemon-select-placeholder');
+    this.placeholderElement.classList.add('pokemon-select-selected');
     
     // Marcar opção selecionada
-    this.optionsList.querySelectorAll('.ability-option').forEach(opt => {
+    this.optionsList.querySelectorAll('.pokemon-option').forEach(opt => {
       opt.classList.remove('selected');
     });
     
-    const selectedOption = this.optionsList.querySelector(`[data-ability="${abilityName}"]`);
+    const selectedOption = this.optionsList.querySelector(`[data-ability="${abilityData.name}"]`);
     if (selectedOption) {
       selectedOption.classList.add('selected');
     }
@@ -517,17 +607,35 @@ class AbilitySelect {
     this.placeholderElement.textContent = message;
     this.abilities = [];
     this.hiddenAbility = null;
+    this.currentOptions = [];
   }
   
   reset() {
     this.currentPokemon = null;
     this.abilities = [];
     this.hiddenAbility = null;
-    this.element.value = '';
-    this.hiddenCheckbox.checked = false;
+    this.currentOptions = [];
+    this.selectedValue = '';
+    this.selectedAbility = null;
+    
+    const hiddenInput = document.getElementById('Habilidade');
+    if (hiddenInput) hiddenInput.value = '';
+    
+    const hiddenCheckbox = document.getElementById('HiddenHabilidade');
+    if (hiddenCheckbox) hiddenCheckbox.checked = false;
+    
     this.placeholderElement.textContent = 'Selecione um Pokémon primeiro';
+    this.placeholderElement.classList.add('pokemon-select-placeholder');
+    this.placeholderElement.classList.remove('pokemon-select-selected');
+    
     this.optionsList.innerHTML = '';
     this.close();
+  }
+  
+  destroy() {
+    if (this.boundDocumentClickHandler) {
+      document.removeEventListener('click', this.boundDocumentClickHandler, true);
+    }
   }
 }
 
@@ -1306,8 +1414,7 @@ function desbloquearBotoes() {
 
 function inicializarPokemonSelect() {
   const pokemonSelectElement = document.getElementById('pokemonSelect');
-  const habilidadeInput = document.getElementById('Habilidade');
-  const hiddenCheckbox = document.getElementById('HiddenHabilidade');
+  const abilitySelectElement = document.getElementById('abilitySelect');
   
   if (pokemonSelectElement) {
     if (window.pokemonSelectInstance) {
@@ -1326,14 +1433,16 @@ function inicializarPokemonSelect() {
   }
   
   // Inicializar sistema de habilidades
-  if (habilidadeInput && hiddenCheckbox) {
+  if (abilitySelectElement) {
     if (window.abilitySelectInstance) {
-      // Limpar instância anterior se existir
-      const oldContainer = document.getElementById('abilitySelectContainer');
-      if (oldContainer) oldContainer.remove();
+      window.abilitySelectInstance.destroy();
+      window.abilitySelectInstance = null;
     }
     
-    window.abilitySelectInstance = new AbilitySelect(habilidadeInput, hiddenCheckbox);
+    const isVisible = abilitySelectElement.offsetParent !== null;
+    if (isVisible) {
+      window.abilitySelectInstance = new AbilitySelect(abilitySelectElement);
+    }
   }
 }
 
@@ -1502,8 +1611,7 @@ function VoltarParaSite() {
   }
   
   if (window.abilitySelectInstance) {
-    const abilityContainer = document.getElementById('abilitySelectContainer');
-    if (abilityContainer) abilityContainer.remove();
+    window.abilitySelectInstance.destroy();
     window.abilitySelectInstance = null;
   }
   
@@ -1746,7 +1854,7 @@ Explicação: ${calculo.foiUpgradado ? calculo.detalhesUpgrade : 'Sem upgrade'}
 
   Fechado();
 })();
-
+// jesus
 // ==================== EXPORTS GLOBAIS ====================
 
 window.Aberto = Aberto;
