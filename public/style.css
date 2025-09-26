@@ -1067,12 +1067,12 @@ p {
 }
 
 .ability-options-list::-webkit-scrollbar-thumb {
-  background: #667eea;
+  background:#292a31;
   border-radius: 3px;
 }
 
 .ability-options-list::-webkit-scrollbar-thumb:hover {
-  background: #5a67d8;
+  background: #292a31;
 }
 
 /* Estados especiais */
@@ -1100,12 +1100,12 @@ p {
 
 /* Melhorias de acessibilidade */
 .ability-select-trigger:focus {
-  outline: 2px solid #667eea;
+  outline: 2px solid #292a31;
   outline-offset: 2px;
 }
 
 .ability-option:focus {
-  background: #667eea;
+  background: #292a31;
   color: white;
   outline: none;
 }
