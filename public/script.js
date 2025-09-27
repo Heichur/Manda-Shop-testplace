@@ -1614,6 +1614,9 @@ async function EnviarPedido() {
     const precoTotal = calculoIVs.preco + precoBreedavel + precoHidden + precoEggMoves;
     const nomeParaPedido = validacaoPokemon.valido ? validacaoPokemon.pokemon : pokeNome;
 
+    console.log('Debug HA - Checkbox checked:', hiddenHabilidade);
+    console.log('Debug HA - Ability selected:', document.getElementById("Habilidade")?.value);
+
     const pedidoData = {
       nomeUsuario,
       nickDiscord: NickDiscord,
