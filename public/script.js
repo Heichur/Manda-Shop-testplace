@@ -1792,15 +1792,17 @@ function testarSistemaIVs() {
     "F4, 0atk, -spe"
   ];
   
-  console.log('TESTE DO SISTEMA DE IVS CORRIGIDO');
+  console.log('TESTE DO SISTEMA DE IVS');
   
   testes.forEach(teste => {
     const resultado = analisarIVsUnificado(teste);
     if (resultado.valido) {
       const calculo = calcularPrecoIVs(resultado);
+      const precoComHA = calculo.preco + 15000;
       console.log(`Input: "${teste}"
 Resultado: ${resultado.tipoIV}${calculo.foiUpgradado ? ` → ${calculo.tipoFinal}` : ''}
-Preço: ${calculo.preco.toLocaleString('pt-BR')}k
+Preço base: ${calculo.preco.toLocaleString('pt-BR')}
+Preço + HA: ${precoComHA.toLocaleString('pt-BR')} (+15k)
 IVs Zerados: [${resultado.statsZerados.join(', ') || 'nenhum'}]
 Informativos: [${resultado.informacoesAdicionais.join(', ') || 'nenhum'}]
 Explicação: ${calculo.foiUpgradado ? calculo.detalhesUpgrade : 'Sem upgrade'}
