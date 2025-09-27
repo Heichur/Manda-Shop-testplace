@@ -15,7 +15,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ==================== POKEMON API INTEGRATION ====================
 
 class PokemonAPIManager {
   constructor() {
@@ -467,7 +466,7 @@ class AbilitySelect {
     if (this.abilities.length > 0) {
       const normalHeader = document.createElement('div');
       normalHeader.className = 'ability-header';
-      normalHeader.textContent = '🔸 Habilidades Normais';
+      normalHeader.textContent = 'Hability';
       this.optionsList.appendChild(normalHeader);
       
       this.abilities.forEach(ability => {
@@ -499,7 +498,7 @@ class AbilitySelect {
     if (this.hiddenAbility) {
       const hiddenHeader = document.createElement('div');
       hiddenHeader.className = 'ability-header hidden';
-      hiddenHeader.textContent = '✨ Habilidade Oculta (Hidden Ability)';
+      hiddenHeader.textContent = 'Hidden Ability';
       this.optionsList.appendChild(hiddenHeader);
       
       const abilityData = {
@@ -992,7 +991,6 @@ function executarEventoSecreto() {
   }, 3000);
 }
 
-// ==================== VALIDAÇÃO DE POKÉMON (ATUALIZADA) ====================
 
 function normalizarNome(nome) {
   if (!nome || typeof nome !== 'string') return '';
@@ -1074,8 +1072,6 @@ async function validarNomePokemon(nomeDigitado) {
     };
   }
 }
-
-// ==================== RESTO DO SISTEMA ORIGINAL ====================
 
 function verificarCooldown() {
   const tempoRestante = COOLDOWN_PEDIDOS - (Date.now() - ultimoPedidoTimestamp);
@@ -1854,8 +1850,6 @@ Explicação: ${calculo.foiUpgradado ? calculo.detalhesUpgrade : 'Sem upgrade'}
 
   Fechado();
 })();
-// jesus
-// ==================== EXPORTS GLOBAIS ====================
 
 window.Aberto = Aberto;
 window.Fechado = Fechado;
