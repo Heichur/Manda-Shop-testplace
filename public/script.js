@@ -502,6 +502,8 @@ class AbilitySelect {
     const hiddenCheckbox = document.getElementById('HiddenHabilidade');
     if (hiddenCheckbox) {
       hiddenCheckbox.checked = abilityData.isHidden;
+      console.log('Checkbox HiddenHabilidade setado para:', abilityData.isHidden);
+      console.log('Ability selecionada:', abilityData.displayName, 'isHidden:', abilityData.isHidden);
     }
     
     this.placeholderElement.textContent = abilityData.displayName + (abilityData.isHidden ? ' (Hidden)' : '');
